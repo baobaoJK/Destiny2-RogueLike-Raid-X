@@ -14,24 +14,9 @@ const router = createRouter({
       component: () => import('@/views/home/IndexView.vue')
     },
     {
-      path: '/destiny2',
-      name: 'destiny2',
-      component: () => import('@/views/orther/Destiny2View.vue')
-    },
-    {
-      path: '/gameplay',
-      name: 'gameplay',
-      component: () => import('@/views/orther/GameplayView.vue')
-    },
-    {
-      path: '/update',
-      name: 'update',
-      component: () => import('@/views/orther/UpdateView.vue')
-    },
-    {
-      path: '/copyright',
-      name: 'copyright',
-      component: () => import('@/views/orther/CopyrightView.vue')
+      path: '/info/:page?',
+      name: 'info',
+      component: () => import('@/views/info/IndexView.vue')
     },
     {
       path: '/gamepanel',

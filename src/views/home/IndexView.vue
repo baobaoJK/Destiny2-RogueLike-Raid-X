@@ -147,10 +147,10 @@ const deleteSave = () => {
       </a>
       <div class="list">
         <div class="link">
-          <router-link to="destiny2">游戏说明</router-link>
-          <router-link to="gameplay">游戏玩法</router-link>
-          <router-link to="update">更新日志</router-link>
-          <router-link to="copyright">版权声明</router-link>
+          <router-link :to="{ name: 'info', params: { page: 'destiny2' } }">游戏说明</router-link>
+          <router-link :to="{ name: 'info', params: { page: 'gameplay' } }">游戏玩法</router-link>
+          <router-link :to="{ name: 'info', params: { page: 'update' } }">更新日志</router-link>
+          <router-link :to="{ name: 'info', params: { page: 'copyright' } }">版权声明</router-link>
         </div>
         <button class="button" @click="deleteSave()">一键清除游戏数据</button>
       </div>
