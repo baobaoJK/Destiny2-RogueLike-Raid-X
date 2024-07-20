@@ -136,6 +136,7 @@
 
   .dialog {
     box-shadow: 0 0 1.25rem #7fe4c5 !important;
+    clip-path: none;
 
     .title {
       color: white;
@@ -214,6 +215,7 @@
   .card-dialog {
     height: 45rem !important;
     padding-top: 2rem;
+    clip-path: none;
 
     .card-list-box {
       display: flex;

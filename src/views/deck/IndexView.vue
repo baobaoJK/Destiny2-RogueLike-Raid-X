@@ -948,13 +948,8 @@ initDeck()
     <button class="button deck-info" @click="deckInfoDialogVisible = true">卡池信息</button>
 
     <!-- 卡池信息框 -->
-    <el-dialog
-      class="dialog deck-info-dialog"
-      v-model="deckInfoDialogVisible"
-      :close-on-click-modal="false"
-      width="79.25rem"
-      align-center
-    >
+    <el-dialog class="dialog deck-info-dialog" v-model="deckInfoDialogVisible" :close-on-click-modal="false"
+      align-center>
       <div class="deck-list-info">
         <h1>卡池信息</h1>
         <p class="deck-type-info safe">
@@ -984,36 +979,23 @@ initDeck()
     </el-dialog>
 
     <!-- 卡牌抽奖模态框 -->
-    <el-dialog
-      class="dialog deck-dialog"
-      v-model="deckDialogVisible"
-      :close-on-click-modal="false"
-      width="79.25rem"
-      align-center
-    >
+    <el-dialog class="dialog deck-dialog" v-model="deckDialogVisible" :close-on-click-modal="false" width="79.25rem"
+      align-center>
       <div class="deck-list-info">
         <p class="deck-list-name">
           {{ deckListName }}
         </p>
         <p class="deck-list-count">卡池说明：{{ deckListText }}</p>
       </div>
-      <div
-        class="deck-list-box"
-        :class="{
-          'deck-1': decks[0],
-          'deck-2': decks[1],
-          'deck-3': decks[2],
-          'deck-4': decks[3],
-          'deck-5': decks[4]
-        }"
-      >
-        <div
-          class="card-item"
-          v-for="(card, index) in deck"
-          :key="index"
-          @click="clickCard(card, index)"
-          :class="{ flip: flips[index] }"
-        >
+      <div class="deck-list-box" :class="{
+        'deck-1': decks[0],
+        'deck-2': decks[1],
+        'deck-3': decks[2],
+        'deck-4': decks[3],
+        'deck-5': decks[4]
+      }">
+        <div class="card-item" v-for="(card, index) in deck" :key="index" @click="clickCard(card, index)"
+          :class="{ flip: flips[index] }">
           <div class="card card-front">
             <div class="card-info">
               <p class="card-id">{{ card.name }}</p>

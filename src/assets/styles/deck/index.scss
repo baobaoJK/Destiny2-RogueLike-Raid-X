@@ -85,16 +85,23 @@
   // 卡池信息框
   .deck-info-dialog {
     width: 64rem;
+    padding: 3rem !important;
 
     .deck-list-info {
+
       h1 {
         text-align: center;
+        margin-bottom: 2rem;
       }
 
       p {
         font-size: 1.25rem;
         margin: 1rem 0;
       }
+    }
+
+    button {
+      margin-top: 1rem;
     }
   }
 

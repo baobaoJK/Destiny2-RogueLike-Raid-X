@@ -158,9 +158,17 @@ const deleteSave = () => {
   </div>
 
   <!-- 角色信息模态框 -->
-  <el-dialog class="dialog role-dialog" v-model="roleDialogVisible" width="50rem" :close-on-click-modal="false"
+  <el-dialog class="role-dialog dialog" v-model="roleDialogVisible" width="50rem" :close-on-click-modal="false"
     align-center>
     <h1 class="title role-title">设置游戏角色信息</h1>
+
+    <div class="box role-captain-box">
+      <p class="title role-captain-title">是否火力战队队长</p>
+      <el-radio-group v-model="userInfo.isCaptain">
+        <el-radio :label="true">是</el-radio>
+        <el-radio :label="false">否</el-radio>
+      </el-radio-group>
+    </div>
 
     <div class="box role-id-box">
       <p class="title role-id-title">选择游戏编号</p>
@@ -170,13 +178,6 @@ const deleteSave = () => {
       </el-radio-group>
     </div>
 
-    <div class="box role-captain-box">
-      <p class="title role-captain-title">是否火力战队队长</p>
-      <el-radio-group v-model="userInfo.isCaptain">
-        <el-radio :label="true">是</el-radio>
-        <el-radio :label="false">否</el-radio>
-      </el-radio-group>
-    </div>
     <div class="name-box role-name-box">
       <p class="role-name-title">输入你的游戏名称 / 游戏ID</p>
       <el-input v-model="userInfo.username" placeholder="请输入你的游戏名称 / 游戏ID"></el-input>

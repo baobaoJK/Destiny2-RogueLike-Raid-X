@@ -63,17 +63,17 @@ body {
     text-decoration: none;
     transition: opacity 0.3s;
     animation: start-button 3s;
+    cursor: pointer;
 
     &:hover {
-      opacity: 0.8;
+      opacity: 0.5;
     }
   }
 }
 
 // 模态框
 .dialog {
-  width: 50rem;
-  padding: 2rem;
+
 
   .title {
     font-weight: 100;
@@ -119,6 +119,10 @@ body {
 }
 
 // 游戏检测模态框
+.el-dialog {
+  clip-path: polygon(5rem 0%, 100% 0%, 100% calc(100% - 5rem), calc(100% - 5rem) 100%, 0 100%, 0% 5rem) !important;
+}
+
 .game-dialog {
   .game-logo {
     width: 8rem;

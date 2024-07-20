@@ -12,8 +12,7 @@ const gameLogo = new URL('/images/Raid.png', import.meta.url).href // 使用 imp
   </div>
 
   <!-- 游戏检测 -->
-  <el-dialog class="dialog game-dialog" v-model="gameDialogVisible" width="50rem" :close-on-click-modal="false"
-    align-center>
+  <el-dialog class="dialog game-dialog" v-model="gameDialogVisible" :close-on-click-modal="false" align-center>
     <img class="game-logo" :src="gameLogo" alt="Logo" />
     <h1 class="title game-title" style="color: #8ab2ff">游戏开始前请阅读以下信息</h1>
     <div class="box game-box">
@@ -42,6 +41,6 @@ const gameLogo = new URL('/images/Raid.png', import.meta.url).href // 使用 imp
   </el-dialog>
 </template>
 
-<style lang="scss">
+<style scoped lang="scss">
 @import '@/assets/styles/index';
 </style>

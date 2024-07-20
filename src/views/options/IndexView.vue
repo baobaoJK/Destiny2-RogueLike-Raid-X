@@ -342,7 +342,6 @@ const globalEvent = () => {
   }
 }
 
-
 // 初始化
 const initOptions = async () => {
   const raidStore = useRaidStore()
