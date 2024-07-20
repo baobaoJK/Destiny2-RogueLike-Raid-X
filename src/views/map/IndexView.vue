@@ -81,7 +81,7 @@ initMap()
     <div class="map-roll-list">
       <div class="map-list" ref="mapListRef">
         <div class="map-img">
-          <img :src="getRaidMapImg('国王的陨落')" alt="国王的陨落.jpg" />
+          <img :src="getRaidMapImg('请选择地图')" alt="请选择地图.jpg" />
         </div>
         <div class="map-img" v-for="(map, index) in mapList" :key="index">
           <img :src="getRaidMapImg(map.name)" :alt="map.name + '.jpg'" />
@@ -90,10 +90,10 @@ initMap()
     </div>
     <div class="map-text">
       <h1 ref="mapNameRef" :style="{ opacity: opacityValue, transition: 'opacity 1s' }">
-        国王的陨落
+
       </h1>
     </div>
-    <button class="map-button" @click="rollMap(mapListRef, mapNameRef)" :disabled="buttonDisabled">
+    <button class="button" @click="rollMap(mapListRef, mapNameRef)" :disabled="buttonDisabled">
       抽取地图
     </button>
   </div>

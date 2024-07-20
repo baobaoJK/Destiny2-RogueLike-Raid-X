@@ -34,34 +34,7 @@ $transitonTime: 0.7s;
         width: 18.75rem;
         height: 10.546875rem;
         border: 0.05rem solid rgb(73, 73, 73);
-        &::after {
-          content: ' ';
-          display: block;
-          position: absolute;
-          width: 0rem;
-          height: 0rem;
-          top: -4.5rem;
-          left: -0.5rem;
-          border-top: 4rem solid transparent;
-          border-right: 4rem solid transparent;
-          border-left: 4rem solid #12171c;
-          border-bottom: 4rem solid transparent;
-        }
-
-        &::before {
-          content: ' ';
-          display: block;
-          position: absolute;
-          width: 0rem;
-          height: 0rem;
-          bottom: -4.5rem;
-          right: -0.5rem;
-          border-top: 4rem solid transparent;
-          border-right: 4rem solid #12171c;
-          border-left: 4rem solid transparent;
-          border-bottom: 4rem solid transparent;
-          z-index: 100;
-        }
+        clip-path: polygon(3rem 0%, 100% 0%, 100% calc(100% - 3rem), calc(100% - 3rem) 100%, 0 100%, 0% 3rem);
 
         img {
           width: 100%;
@@ -111,12 +84,13 @@ $transitonTime: 0.7s;
         margin-bottom: 1rem;
 
         &::before {
-          content: '1';
+          content: ' ';
           position: absolute;
           top: calc(50% - 0.125rem);
           width: 100%;
           height: 0.25rem;
           background-color: #e0e0e0;
+          clip-path: polygon(2% 0, 98% 0, 98% 100%, 2% 100%);
           z-index: 1;
         }
 
@@ -127,7 +101,8 @@ $transitonTime: 0.7s;
           top: calc(50% - 0.125rem);
           width: 0;
           height: 0.25rem;
-          background-color: $mainColor;
+          background-color: #405286;
+          clip-path: polygon(2% 0, 98% 0, 98% 100%, 2% 100%);
           z-index: 1;
           transition: width $transitonTime;
         }
@@ -137,17 +112,17 @@ $transitonTime: 0.7s;
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 2rem;
-          height: 2rem;
+          width: 2.5rem;
+          height: 2.5rem;
           box-sizing: border-box;
           background-color: white;
-          border: 3px solid #e0e0e0;
-          border-radius: 50%;
-          transition: border $transitonTime;
+          clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+          transition: all $transitonTime;
           z-index: 2;
 
           &.active {
-            border: 3px solid $mainColor;
+            background-color: #405286;
+            color: white;
           }
         }
       }
@@ -201,10 +176,10 @@ $transitonTime: 0.7s;
   }
 
   // 货币/抽卡次数模态框样式
-  .money-dialog,
-  .card-dialog {
-    .money-input-box,
-    .card-input-box {
+  .value-dialog {
+    clip-path: polygon(3rem 0%, 100% 0%, 100% calc(100% - 3rem), calc(100% - 3rem) 100%, 0 100%, 0% 3rem);
+
+    .value-input-box {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -213,7 +188,7 @@ $transitonTime: 0.7s;
 
       label {
         color: white;
-        font-size: 1rem;
+        font-size: 1.25rem;
         margin-bottom: 1rem;
       }
     }
@@ -223,8 +198,7 @@ $transitonTime: 0.7s;
       margin-top: 1rem;
 
       button {
-        padding: 0.5rem 2.5rem;
-        margin: 0 1rem;
+        padding: 0.25rem 4em;
       }
     }
   }

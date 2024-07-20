@@ -126,11 +126,12 @@ ul {
 
 // 默认按钮样式
 .button {
+  position: relative;
   color: white;
   font-size: 1.25rem;
   padding: 0.375rem 4rem;
   background-color: #405286;
-  border: 1px solid #616885;
+  border: 1px solid #7380a4;
   transition: all 0.5s;
   cursor: pointer;
 
@@ -142,6 +143,8 @@ ul {
     opacity: 0.5;
     cursor: not-allowed;
   }
+
+  clip-path: polygon(2rem 0%, 100% 0%, calc(100% - 2rem) 100%, 0% 100%);
 }
 
 // 1200px - 1600px
@@ -156,4 +159,35 @@ ul {
   html {
     font-size: 10px;
   }
+}
+
+/* 隐藏默认的滚动条 */
+body {
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* Internet Explorer and Edge */
+}
+
+/* 滚动条的宽度 */
+::-webkit-scrollbar {
+  width: 0.25rem;
+}
+
+/* 滚动条的轨道 */
+::-webkit-scrollbar-track {
+  background: #ffffff;
+  border-radius: 1rem;
+}
+
+/* 滚动条的滑块 */
+::-webkit-scrollbar-thumb {
+  background: #4aaeff;
+  border-radius: 1rem;
+}
+
+/* 滚动条的滑块在悬停时的样式 */
+::-webkit-scrollbar-thumb:hover {
+  background: #5d9fd4;
+  cursor: pointer;
 }

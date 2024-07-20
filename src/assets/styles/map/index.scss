@@ -36,34 +36,7 @@
         height: 30.9375rem;
         margin-right: 2rem;
 
-        &::after {
-          content: ' ';
-          display: block;
-          position: absolute;
-          width: 0rem;
-          height: 0rem;
-          top: -8.5rem;
-          left: -0.5rem;
-          border-top: 8rem solid transparent;
-          border-right: 8rem solid transparent;
-          border-left: 8rem solid #12171c;
-          border-bottom: 8rem solid transparent;
-        }
-
-        &::before {
-          content: ' ';
-          display: block;
-          position: absolute;
-          width: 0rem;
-          height: 0rem;
-          bottom: -8.5rem;
-          right: -0.5rem;
-          border-top: 8rem solid transparent;
-          border-right: 8rem solid #12171c;
-          border-left: 8rem solid transparent;
-          border-bottom: 8rem solid transparent;
-          z-index: 100;
-        }
+        clip-path: polygon(8rem 0%, 100% 0%, 100% calc(100% - 8rem), calc(100% - 8rem) 100%, 0 100%, 0% 8rem);
 
         img {
           position: relative;
@@ -82,27 +55,5 @@
     height: 4rem;
     margin-bottom: 2rem;
     color: white;
-  }
-
-  // 抽取按钮
-  .map-button {
-    background-color: rgb(73, 125, 230);
-    outline: none !important;
-    border: none;
-    border-radius: 0.25rem;
-    padding: 0.5rem 2rem;
-    font-size: 1.25rem;
-    color: white;
-    transition: all 0.5s;
-    cursor: pointer;
-
-    &:hover {
-      opacity: 0.6;
-    }
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
   }
 }

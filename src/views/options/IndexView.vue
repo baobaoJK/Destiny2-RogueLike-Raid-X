@@ -8,8 +8,12 @@ import {
   lotteryByCount,
   shuffle,
   deckType,
-  getDeckListTypeCount
+  getDeckListTypeCount,
+  checkRaidMap,
+  randomNum,
+  checkList
 } from '@/utils'
+import ChangeValue from './components/ChangeValue.vue'
 
 // 读取游戏信息
 const maps = ref()
@@ -17,12 +21,10 @@ const mapName = ref('请选择地图')
 
 // 提示框
 const mapDialogVisible = ref(false)
-const moneyDialogVisible = ref(false)
-const cardDialogVisible = ref(false)
-
-// 输入框
-const moneyInputRef = ref('')
-const cardInputRef = ref('')
+const dialog = ref()
+const dialogVisible = ref(true)
+const dialogTitle = ref('')
+const dialogType = ref('')
 
 // 按钮
 const mapDoorButtonDisabled = ref(false)
@@ -70,10 +72,11 @@ const setMap = (map: any) => {
 
 // 遭遇战插旗点
 const mapDoor = () => {
-  const userStore = useUserStore()
-  const raidStore = useRaidStore()
-  if (raidStore.map == '') return
 
+  // 检测地图是否为空
+  if (checkRaidMap()) return
+
+  // 判断插旗点
   if (mapStepNum.value > mapSteps.value + 1) return
 
   // 赏金任务
@@ -83,12 +86,13 @@ const mapDoor = () => {
   // 循环抽取赏金任务
   while (bountyList.length != 3) {
     let bounty = lottery(bountyStore.bounty)
-    if (checkBounty(bountyList, bounty)) {
+    if (checkList(bountyList, bounty)) {
       bountyList.push(bounty)
     }
   }
 
   // 设置赏金任务 与 添加抽卡次数
+  const userStore = useUserStore()
   userStore.bountyList = bountyList
   userStore.drawCount += 2
 
@@ -109,18 +113,23 @@ const mapDoor = () => {
     globalEvent()
   }
 
+  // 更改按钮状态
   mapDoorButtonDisabled.value = true
-  setTimeout(() => {
+  const changeButtonState = setTimeout(() => {
     mapDoorButtonDisabled.value = false
+    clearInterval(changeButtonState)
   }, 3000)
 }
 
 // 遭遇战完成按钮
 const mapNext = () => {
-  const raidStore = useRaidStore()
-  if (raidStore.map == '') return
 
+  // 判断突袭地图是否非空
+  if (checkRaidMap()) return
+
+  // 判断当前进度
   if (mapStepNum.value <= mapSteps.value) {
+    const raidStore = useRaidStore()
     mapStepNum.value += 1
 
     if (mapStepNum.value == 2) {
@@ -128,12 +137,14 @@ const mapNext = () => {
       return
     }
 
+    // 修改用户信息
     const userStore = useUserStore()
-    userStore.playerMoney += 3
+    const randomMoney = randomNum(1, 3)
+    userStore.playerMoney += randomMoney
     raidStore.levelPoint = mapStepNum.value
 
     ElMessage({
-      message: '已通关遭遇战获得 3 货币',
+      message: `已通关遭遇战获得 ${randomMoney} 货币`,
       grouping: true,
       type: 'success'
     })
@@ -181,113 +192,80 @@ const mapNext = () => {
       }
     }
 
+    // 更改按钮状态
     mapNextButtonDisabled.value = true
-    setTimeout(() => {
+    const changeButtonState = setTimeout(() => {
       mapNextButtonDisabled.value = false
+      clearInterval(changeButtonState)
     }, 3000)
   }
 }
 
 // 获取隐藏箱事件
 const nextChest = () => {
-  const raidStore = useRaidStore()
-  if (raidStore.map == '') return
+  // 判断突袭地图是否为空
+  if (checkRaidMap()) return
 
   if (chestStepNum.value <= chestSteps.value) {
     chestStepNum.value += 1
 
+    const raidStore = useRaidStore()
     raidStore.chestPoint = chestStepNum.value
 
     const userStore = useUserStore()
-    userStore.playerMoney += 3
+    const randomMoney = randomNum(1, 3)
+    userStore.playerMoney += randomMoney
 
     ElMessage({
-      message: '已获取隐藏箱获得 3 货币',
+      message: `已获取隐藏箱获得 ${randomMoney} 货币`,
       grouping: true,
       type: 'success'
     })
 
     chestNextButtonDisabled.value = true
-    setTimeout(() => {
+    const changeButtonState = setTimeout(() => {
       chestNextButtonDisabled.value = false
+      clearInterval(changeButtonState)
     }, 3000)
   }
 }
 
-// 更改货币数量按钮
-const setMoney = () => {
-  if (moneyInputRef.value == '') {
-    ElMessage({
-      message: '请输入货币数量',
-      grouping: true,
-      type: 'error'
-    })
-    return
+// 显示修改数量模态框
+const showDialog = (type: string) => {
+  // 判断突袭地图是否为空
+  if (checkRaidMap()) return
+
+  // 判断是什么类型的模态框
+  if (type == 'money') {
+    dialogTitle.value = '设置货币数量'
+  } else if (type == 'draw') {
+    dialogTitle.value = '设置抽卡次数'
   }
 
-  const userStore = useUserStore()
-  userStore.playerMoney = Number(moneyInputRef.value)
-
-  ElMessage({
-    message: '已更改货币数量为 ' + moneyInputRef.value,
-    grouping: true,
-    type: 'success'
-  })
-
-  moneyDialogVisible.value = false
-  moneyInputRef.value = ''
-}
-
-// 更改抽卡次数按钮
-const setDrawCount = () => {
-  if (cardInputRef.value == '') {
-    ElMessage({
-      message: '请输入抽卡次数',
-      grouping: true,
-      type: 'error'
-    })
-    return
-  }
-
-  const userStore = useUserStore()
-  userStore.drawCount = Number(cardInputRef.value)
-
-  ElMessage({
-    message: '已更改抽卡数量为 ' + cardInputRef.value,
-    grouping: true,
-    type: 'success'
-  })
-
-  cardDialogVisible.value = false
-  cardInputRef.value = ''
+  // 打开模态框
+  dialog.value.open(type)
 }
 
 // 无暇按钮
 const flawlessButton = () => {
+  // 判断突袭地图是否为空
+  if (checkRaidMap()) return
   // 添加货币
   const userStore = useUserStore()
   userStore.playerMoney += 6
 
   ElMessage({
-    message: '已添加 6 货币',
+    message: '已为您添加 6 个货币',
     grouping: true,
     type: 'success'
   })
 
+  // 更改按钮状态
   flawlessButtonDisabled.value = true
-  setTimeout(() => {
+  const changeButtonState = setTimeout(() => {
     flawlessButtonDisabled.value = false
+    clearInterval(changeButtonState)
   }, 3000)
-}
-
-// 赏金去重
-const checkBounty = (bountyList: any, bounty: any) => {
-  for (const element of bountyList) {
-    if (element == bounty) {
-      return false
-    }
-  }
-  return true
 }
 
 // 设置地图信息
@@ -364,6 +342,7 @@ const globalEvent = () => {
   }
 }
 
+
 // 初始化
 const initOptions = async () => {
   const raidStore = useRaidStore()
@@ -387,11 +366,12 @@ initOptions()
         <p>遭遇战通关进度</p>
         <div class="map-step-bar">
           <div class="map-bar" :style="{ width: (mapStepNum - 1) * mapStepWidth + '%' }"></div>
-          <div class="step map-step" v-for="index in mapSteps + 1" :key="index" :class="{ active: index >= 1 }">
+          <div class="step map-step" v-for="index in mapSteps + 1" :key="index"
+            :class="{ active: mapStepNum >= index }">
             {{ index - 1 }}
           </div>
         </div>
-        <div class="step-options">
+        <div class="step-options map-options">
           <button class="button" id="map-door" @click="mapDoor" :disabled="mapDoorButtonDisabled">
             抵达遭遇战插旗点（再点这个）
           </button>
@@ -405,11 +385,12 @@ initOptions()
         <p>隐藏箱进度</p>
         <div class="chest-step-bar">
           <div class="chest-bar" :style="{ width: (chestStepNum - 1) * chestStepWidth + '%' }"></div>
-          <div class="step map-step" v-for="index in chestSteps + 1" :key="index" :class="{ active: index >= 1 }">
+          <div class="step map-step" v-for="index in chestSteps + 1" :key="index"
+            :class="{ active: chestStepNum >= index }">
             {{ index - 1 }}
           </div>
         </div>
-        <div class="step-options">
+        <div class="step-options chest-options">
           <button class="button" id="chest-next" @click="nextChest" :disabled="chestNextButtonDisabled">
             已获取隐藏箱
           </button>
@@ -418,14 +399,14 @@ initOptions()
     </div>
 
     <div class="options-pane">
-      <button class="button" id="money-button" @click="moneyDialogVisible = true">
+      <button class="button" id="money-button" @click="showDialog('money')">
         设置货币数量
       </button>
-      <button class="button" id="card-button" @click="cardDialogVisible = true">
+      <button class="button" id="card-button" @click="showDialog('draw')">
         设置抽卡次数
       </button>
       <button class="button" id="flawless" @click="flawlessButton" :disabled="flawlessButtonDisabled">
-        无暇通关（加 6 货币）
+        无暇通关（全员无暇 加 6 货币）
       </button>
     </div>
 
@@ -445,35 +426,7 @@ initOptions()
       </div>
     </el-dialog>
 
-    <!-- 更改货币数量模态框 -->
-    <el-dialog class="dialog money-dialog" v-model="moneyDialogVisible" :close-on-click-modal="false" width="25rem"
-      align-center>
-      <div class="money-input-box">
-        <label for="money">输入货币数量：</label>
-        <el-input type="text" id="money" v-model="moneyInputRef"></el-input>
-      </div>
-      <div class="buttons">
-        <button type="button" class="button money-confirm" @click="setMoney">确认</button>
-        <button type="button" class="button money-cancel" @click="moneyDialogVisible = false">
-          取消
-        </button>
-      </div>
-    </el-dialog>
-
-    <!-- 更改抽卡次数模态框 -->
-    <el-dialog class="dialog card-dialog" v-model="cardDialogVisible" :close-on-click-modal="false" width="25rem"
-      align-center>
-      <div class="card-input-box">
-        <label for="card">输入抽卡次数：</label>
-        <el-input type="text" id="card" v-model="cardInputRef"></el-input>
-      </div>
-      <div class="buttons">
-        <button type="button" class="button card-confirm" @click="setDrawCount">确认</button>
-        <button type="button" class="button card-cancel" @click="cardDialogVisible = false">
-          取消
-        </button>
-      </div>
-    </el-dialog>
+    <ChangeValue ref="dialog" v-model:show-dialog="dialogVisible" :title="dialogTitle" :type="dialogType"></ChangeValue>
   </div>
 </template>
 
