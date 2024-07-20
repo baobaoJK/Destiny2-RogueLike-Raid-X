@@ -1,11 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { useRaidStore } from './raid'
-import { useDungenoStore } from './dungeon'
-import { useBountyStore } from './bounty'
-import { useEventStore } from './event'
-import { useShopStore } from './shop'
-import { useDeckListStore } from './decklist'
 
 export const useUserStore = defineStore(
   'user',
@@ -46,7 +40,7 @@ export const useUserStore = defineStore(
     const globalEventList: any = ref([])
 
     //  设置用户信息
-    const setUserInfo = (newUserInfo: any) => {
+    const setUserInfo = async (newUserInfo: any) => {
       role.value = newUserInfo.role
       roleId.value = newUserInfo.roleId
       username.value = newUserInfo.username
@@ -90,33 +84,6 @@ export const useUserStore = defineStore(
           count: 1
         }
       ]
-
-      // 获取突袭地图
-      const raidStore = useRaidStore()
-      raidStore.getMaps()
-
-      // 获取地牢地图
-      const dungenoStore = useDungenoStore()
-      dungenoStore.getDungeons()
-
-      // 获取商店列表
-      const shopStore = useShopStore()
-      shopStore.getShopList()
-
-      // 获取卡牌列表
-      const deckListStore = useDeckListStore()
-      deckListStore.getDeckList()
-
-      // 获取赏金列表
-      const bountyStore = useBountyStore()
-      bountyStore.getBountyList()
-
-      // 获取个人事件列表
-      const eventStore = useEventStore()
-      eventStore.getPlayerEventList()
-
-      // 获取全局事件列表
-      eventStore.getGlobalEventList()
     }
 
     // 获取用户信息

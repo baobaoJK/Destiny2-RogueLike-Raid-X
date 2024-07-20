@@ -51,7 +51,7 @@ const setRole = (role: string) => {
 }
 
 // 设置角色信息
-const setRoleInfo = () => {
+const setRoleInfo = async () => {
   let messageInfo = ''
 
   // 判断角色信息
@@ -70,9 +70,37 @@ const setRoleInfo = () => {
       type: 'error'
     })
   } else {
+
     // 存储信息
     const userStore = useUserStore()
     userStore.setUserInfo(userInfo.value)
+
+    // 获取突袭地图
+    const raidStore = useRaidStore()
+    await raidStore.getMaps()
+
+    // 获取地牢地图
+    const dungenoStore = useDungenoStore()
+    await dungenoStore.getDungeons()
+
+    // 获取商店列表
+    const shopStore = useShopStore()
+    await shopStore.getShopList()
+
+    // 获取卡牌列表
+    const deckListStore = useDeckListStore()
+    await deckListStore.getDeckList()
+
+    // 获取赏金列表
+    const bountyStore = useBountyStore()
+    await bountyStore.getBountyList()
+
+    // 获取个人事件列表
+    const eventStore = useEventStore()
+    await eventStore.getPlayerEventList()
+
+    // 获取全局事件列表
+    await eventStore.getGlobalEventList()
 
     // 跳转游戏面板
     // router.replace('/gamepanel')
@@ -130,13 +158,8 @@ const deleteSave = () => {
   </div>
 
   <!-- 角色信息模态框 -->
-  <el-dialog
-    class="dialog role-dialog"
-    v-model="roleDialogVisible"
-    width="50rem"
-    :close-on-click-modal="false"
-    align-center
-  >
+  <el-dialog class="dialog role-dialog" v-model="roleDialogVisible" width="50rem" :close-on-click-modal="false"
+    align-center>
     <h1 class="title role-title">设置游戏角色信息</h1>
 
     <div class="box role-id-box">

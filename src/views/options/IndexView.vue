@@ -293,7 +293,7 @@ const checkBounty = (bountyList: any, bounty: any) => {
 // 设置地图信息
 const setMapInfo = () => {
   const raidStore = useRaidStore()
-  if (raidStore.map != '') {
+  if (raidStore.map != '' && raidStore.map != null) {
     mapName.value = raidStore.map.name
     mapSteps.value = raidStore.map.level
     mapStepNum.value = raidStore.levelPoint
@@ -387,12 +387,7 @@ initOptions()
         <p>遭遇战通关进度</p>
         <div class="map-step-bar">
           <div class="map-bar" :style="{ width: (mapStepNum - 1) * mapStepWidth + '%' }"></div>
-          <div
-            class="step map-step"
-            v-for="index in mapSteps + 1"
-            :key="index"
-            :class="{ active: index >= 1 }"
-          >
+          <div class="step map-step" v-for="index in mapSteps + 1" :key="index" :class="{ active: index >= 1 }">
             {{ index - 1 }}
           </div>
         </div>
@@ -409,26 +404,13 @@ initOptions()
       <div class="map-chest-box">
         <p>隐藏箱进度</p>
         <div class="chest-step-bar">
-          <div
-            class="chest-bar"
-            :style="{ width: (chestStepNum - 1) * chestStepWidth + '%' }"
-          ></div>
-          <div
-            class="step map-step"
-            v-for="index in chestSteps + 1"
-            :key="index"
-            :class="{ active: index >= 1 }"
-          >
+          <div class="chest-bar" :style="{ width: (chestStepNum - 1) * chestStepWidth + '%' }"></div>
+          <div class="step map-step" v-for="index in chestSteps + 1" :key="index" :class="{ active: index >= 1 }">
             {{ index - 1 }}
           </div>
         </div>
         <div class="step-options">
-          <button
-            class="button"
-            id="chest-next"
-            @click="nextChest"
-            :disabled="chestNextButtonDisabled"
-          >
+          <button class="button" id="chest-next" @click="nextChest" :disabled="chestNextButtonDisabled">
             已获取隐藏箱
           </button>
         </div>
@@ -442,24 +424,14 @@ initOptions()
       <button class="button" id="card-button" @click="cardDialogVisible = true">
         设置抽卡次数
       </button>
-      <button
-        class="button"
-        id="flawless"
-        @click="flawlessButton"
-        :disabled="flawlessButtonDisabled"
-      >
+      <button class="button" id="flawless" @click="flawlessButton" :disabled="flawlessButtonDisabled">
         无暇通关（加 6 货币）
       </button>
     </div>
 
     <!-- 地图选择模态框 -->
-    <el-dialog
-      class="dialog map-dialog"
-      v-model="mapDialogVisible"
-      :close-on-click-modal="false"
-      width="75rem"
-      align-center
-    >
+    <el-dialog class="dialog map-dialog" v-model="mapDialogVisible" :close-on-click-modal="false" width="75rem"
+      align-center>
       <div class="map-list-box">
         <div class="map-item" v-for="(map, index) in maps" :key="index" @click="setMap(map)">
           <img :src="getRaidMapImg(map.name)" :alt="map.name" />
@@ -474,13 +446,8 @@ initOptions()
     </el-dialog>
 
     <!-- 更改货币数量模态框 -->
-    <el-dialog
-      class="dialog money-dialog"
-      v-model="moneyDialogVisible"
-      :close-on-click-modal="false"
-      width="25rem"
-      align-center
-    >
+    <el-dialog class="dialog money-dialog" v-model="moneyDialogVisible" :close-on-click-modal="false" width="25rem"
+      align-center>
       <div class="money-input-box">
         <label for="money">输入货币数量：</label>
         <el-input type="text" id="money" v-model="moneyInputRef"></el-input>
@@ -494,13 +461,8 @@ initOptions()
     </el-dialog>
 
     <!-- 更改抽卡次数模态框 -->
-    <el-dialog
-      class="dialog card-dialog"
-      v-model="cardDialogVisible"
-      :close-on-click-modal="false"
-      width="25rem"
-      align-center
-    >
+    <el-dialog class="dialog card-dialog" v-model="cardDialogVisible" :close-on-click-modal="false" width="25rem"
+      align-center>
       <div class="card-input-box">
         <label for="card">输入抽卡次数：</label>
         <el-input type="text" id="card" v-model="cardInputRef"></el-input>
