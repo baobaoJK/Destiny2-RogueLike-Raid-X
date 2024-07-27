@@ -51,6 +51,12 @@ const initGamePanel = () => {
     emblemSpecial.value = new URL('/images/emblem/up/ngm/special.jpg', import.meta.url).href
     emblemIcon.value = new URL('/images/emblem/up/ngm/overlay.png', import.meta.url).href
   }
+  // 铸币梅eve
+  else if (userInfo.value.username === '铸币梅eve') {
+    emblemSpecial.value = new URL('/images/emblem/up/zbmeve/special.png', import.meta.url).href
+    emblemIcon.value = new URL('/images/emblem/up/zbmeve/overlay.png', import.meta.url).href
+
+  }
   else if (userInfo.value.isCaptain) {
     emblemSpecial.value = new URL('/images/emblem/captain-w.jpg', import.meta.url).href
     emblemIcon.value = new URL('/images/emblem/captain_icon.png', import.meta.url).href
