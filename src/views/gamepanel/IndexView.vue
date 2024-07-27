@@ -2,10 +2,9 @@
 import { useUserStore } from '@/stores'
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { lightImg, cardImg } from '@/utils';
 
 const userInfo = ref()
-const lightImg = new URL('/images/light.png', import.meta.url).href
-const cardImg = new URL('/images/card.png', import.meta.url).href
 const route: any = ref('')
 const routePath = [
   '/map',
@@ -43,10 +42,16 @@ const initGamePanel = () => {
   userInfo.value = userStore.getUserInfo()
 
   // 设置名片
-  if (userInfo.value.username == '和泉纱雾') {
+  if (userInfo.value.username === '和泉纱雾') {
     emblemSpecial.value = new URL('/images/emblem/es-w.jpg', import.meta.url).href
     emblemIcon.value = new URL('/images/emblem/es_icon.png', import.meta.url).href
-  } else if (userInfo.value.isCaptain) {
+  }
+  // 年糕明名片
+  else if (userInfo.value.username === '年糕明') {
+    emblemSpecial.value = new URL('/images/emblem/up/ngm/special.jpg', import.meta.url).href
+    emblemIcon.value = new URL('/images/emblem/up/ngm/overlay.png', import.meta.url).href
+  }
+  else if (userInfo.value.isCaptain) {
     emblemSpecial.value = new URL('/images/emblem/captain-w.jpg', import.meta.url).href
     emblemIcon.value = new URL('/images/emblem/captain_icon.png', import.meta.url).href
   } else {
@@ -120,6 +125,9 @@ initGamePanel()
           <li class="menu-link" key="8" :class="{ active: activeIndex === 8 }" @click="setActive(8)">
             <router-link to="shop" target="windows">商店</router-link>
           </li>
+          <!-- <li class="menu-link" key="9" :class="{ active: activeIndex === 9 }" @click="setActive(9)">
+            <router-link to="shop" target="windows">记忆水晶</router-link>
+          </li> -->
         </ul>
       </div>
     </div>

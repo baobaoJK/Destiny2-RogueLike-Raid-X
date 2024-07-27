@@ -6,7 +6,6 @@ pinia.use(persist)
 
 export default pinia
 
-export * from './modules/config'
 export * from './modules/raid'
 export * from './modules/dungeon'
 export * from './modules/user'

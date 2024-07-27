@@ -1,33 +1,38 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { ElMessage } from 'element-plus'
 import { useDungenoStore, useUserStore } from '@/stores'
-import { shuffle, lottery, checkDeck, getDeckListType, deckType } from '@/utils'
+import { shuffle, lottery, checkDeck, getDeckListType, deckType, getDeckListTagLevelList } from '@/utils'
+import InfoBoard from "@/components/infoboard/IndexView.vue"
 
-// 全局事件
-const globalEventList = ref()
+// 用户信息
+const userStore = useUserStore()
+const { globalEventList, infoBoard } = storeToRefs(useUserStore())
+
+// 地牢信息
+const dungeonStore = useDungenoStore()
 
 // 抽卡模态框
 const deckDialogVisible = ref(false)
+const deckTitle = ref()
 
 // 属性
 const eventFlipList: any = ref([])
-const eventTitle = ref('当前没有事件')
-const playersText = ref('')
 
 const selfDeckList = ref()
 const cardFlip = ref(Array.from({ length: 6 }, () => false))
 
 // 接受事件
-const acceptEvent = (playerEvent: any, index: number) => {
-  runEvent(playerEvent.name)
+const acceptEvent = (globalEvent: any, index: number) => {
   globalEventList.value[index].stage = 'active'
+  runEvent(globalEvent.name)
 }
 
 // 完成事件
-const finishEvent = (playerEvent: any, index: number) => {
+const finishEvent = (globalEvent: any, index: number) => {
   ElMessage({
-    message: '已完成事件',
+    message: `已完成 ${globalEvent.eventName} 事件`,
     grouping: true,
     type: 'success'
   })
@@ -37,28 +42,11 @@ const finishEvent = (playerEvent: any, index: number) => {
 
 // 删除事件
 const deleteEvent = (index: number) => {
-  const userStore = useUserStore()
   globalEventList.value.splice(index, 1)
-
-  const newEventList: any = ref([])
-
-  globalEventList.value.forEach((item: any) => {
-    if (item) {
-      newEventList.value.push(item)
-    }
-  })
-
-  userStore.globalEventList = newEventList.value
-
-  if (globalEventList.value.length == 0) {
-    eventTitle.value = '当前没有事件'
-  }
 }
 
 // 全局事件处理机制 ↓
 const runEvent = (eventName: any) => {
-  const userStore = useUserStore()
-  const dungeonStore = useDungenoStore()
 
   let players = [1, 2, 3, 4, 5, 6]
 
@@ -71,29 +59,24 @@ const runEvent = (eventName: any) => {
   // 紧急支援
   if (eventName == 'MAYDAY') {
     const dungeon = lottery(dungeonStore.dungeons)
-    str = `玩家 ${players[0]} | ${players[1]} | ${players[2]} 需前往 - ${dungeon.name} -`
+    str = `玩家 ${players[0]} | ${players[1]} | ${players[2]} 需前往 - ${dungeon.name} - 进行地牢遭遇战`
   }
 
   // 五谷丰登
   if (eventName == 'Bumper-Harvest') {
     deckDialogVisible.value = true
-    const deck = getDeckListType(deckType[0])
+    deckTitle.value = '五谷丰登'
 
-    // 微弱增益
-    while (deck.length != 6) {
-      const card = lottery(deck)
-      if (checkDeck(deck, card)) {
-        deck.push(card)
-      }
-    }
+    const deckList = getDeckListTagLevelList('MicroGain', [2, 2, 2])
 
-    selfDeckList.value = deck
+    selfDeckList.value = deckList
     str =
       `抽取顺序为 ${players[0]} | ${players[1]} | ${players[2]} ` +
       `| ${players[3]} | ${players[4]} | ${players[5]}`
 
-    setTimeout(() => {
+    const changeCardState = setTimeout(() => {
       cardFlip.value = Array.from({ length: 6 }, () => true)
+      clearTimeout(changeCardState)
     }, 500)
   }
 
@@ -115,12 +98,31 @@ const runEvent = (eventName: any) => {
     str = `玩家 ${players[0]} 需要当报数者，剩余玩家当木头人，前往熔炉竞技场进行此活动`
   }
 
-  // 改变事件状态
-  for (let i = 0; i < globalEventList.value.length; i++) {
-    if (eventName == globalEventList.value[i].name) {
-      userStore.globalEventList[i].stage = 'active'
-      break
-    }
+  // 左平行，右......
+  if (eventName == 'Left-Parallel-Right') {
+    str =
+      `1队 ${players[0]} | ${players[1]} 号 玩家 || ` +
+      `2队 ${players[2]} | ${players[3]} 号 玩家 || ` +
+      `3队 ${players[4]} | ${players[5]} 号 玩家`
+  }
+
+  // 生化母体
+  if (eventName == 'Biochemical-Matrix') {
+    deckDialogVisible.value = true
+    deckTitle.value = '生化危机'
+
+    const deckList = getDeckListTagLevelList('StrongDiscomfort', [1, 2, 3])
+
+    selfDeckList.value = deckList
+    str = `从左至右的获取顺序为 ` +
+      `${players[0]} | ${players[1]} | ${players[2]} ` +
+      `| ${players[3]} | ${players[4]} | ${players[5]}` +
+      `若玩家身上由此张卡牌则作废`
+
+    const changeCardState = setTimeout(() => {
+      cardFlip.value = Array.from({ length: 6 }, () => true)
+      clearTimeout(changeCardState)
+    }, 500)
   }
 
   if (str != '') {
@@ -134,34 +136,23 @@ const runEvent = (eventName: any) => {
 
 // 初始化
 const initGlobalEvent = () => {
-  // 读取存档
-  const userStore = useUserStore()
-  globalEventList.value = userStore.globalEventList
-  // console.log(gameConfig.globalEventList)
 
-  eventFlipList.value = []
+  eventFlipList.value = Array.from({ length: globalEventList.value.length }, () => false)
 
-  if (globalEventList.value.length != 0) {
-    eventTitle.value = '当前有新事件'
-    for (const element of globalEventList.value) {
-      eventFlipList.value.push(false)
+  const changeCardState = setTimeout(() => {
+    for (let i = 0; i < eventFlipList.value.length; i++) {
+      eventFlipList.value[i] = true
     }
-
-    setTimeout(() => {
-      for (let i = 0; i < eventFlipList.value.length; i++) {
-        eventFlipList.value[i] = true
-      }
-    }, 100)
-  } else {
-    eventTitle.value = '当前没有事件'
-  }
+    clearTimeout(changeCardState)
+  }, 100)
 }
 initGlobalEvent()
 </script>
 
 <template>
   <div id="globalevent">
-    <h2 class="event-title">{{ eventTitle }}</h2>
+    <h2 class="event-title" v-if="globalEventList.length == 0">当前没有全局事件</h2>
+    <h2 class="event-title" v-else>全局事件</h2>
 
     <div class="event-list">
       <div class="event-box" v-for="(globalEvent, index) in globalEventList" :key="index">
@@ -172,25 +163,17 @@ initGlobalEvent()
                 <p class="title">{{ globalEvent.eventName }}</p>
                 <p class="sub-title">{{ globalEvent.name }}</p>
               </div>
-              <p class="text">{{ globalEvent.description }}</p>
+              <div>
+                <p class="text">{{ globalEvent.description }}</p>
+                <hr v-if="globalEvent.idea !== 'D2RRX'">
+                <p v-if="globalEvent.idea !== 'D2RRX'">想法来源：{{ globalEvent.idea }}</p>
+              </div>
               <div class="buttons">
-                <button
-                  class="button confirm"
-                  :style="{
-                    display:
-                      globalEvent.stage === 'none' || globalEvent.stage === 'timeout'
-                        ? 'block'
-                        : 'none'
-                  }"
-                  @click="acceptEvent(globalEvent, index)"
-                >
+                <button class="button confirm" v-if="globalEvent.stage === 'none'"
+                  @click="acceptEvent(globalEvent, index)">
                   接受
                 </button>
-                <button
-                  class="button finish"
-                  :style="{ display: globalEvent.stage === 'active' ? 'block' : 'none' }"
-                  @click="finishEvent(globalEvent, index)"
-                >
+                <button class="button finish" v-else @click="finishEvent(globalEvent, index)">
                   完成
                 </button>
               </div>
@@ -203,24 +186,13 @@ initGlobalEvent()
     </div>
 
     <!-- 卡牌抽奖模态框 -->
-    <el-dialog
-      class="dialog deck-dialog"
-      v-model="deckDialogVisible"
-      :close-on-click-modal="false"
-      width="79.25rem"
-      align-center
-    >
+    <el-dialog class="dialog deck-dialog" v-model="deckDialogVisible" :close-on-click-modal="false" width="79.25rem"
+      align-center>
       <div class="deck-info">
-        <h1 class="deck-title">五谷丰登</h1>
-        <p class="players">{{ playersText }}</p>
+        <h1 class="deck-title">{{ deckTitle }}</h1>
       </div>
       <div class="deck-list-box">
-        <div
-          class="card-item"
-          v-for="(card, index) in selfDeckList"
-          :key="index"
-          :class="{ flip: cardFlip[index] }"
-        >
+        <div class="card-item" v-for="(card, index) in selfDeckList" :key="index" :class="{ flip: cardFlip[index] }">
           <div class="card card-front">
             <div class="card-info">
               <p class="card-id">{{ card.cardName }}</p>
@@ -234,9 +206,33 @@ initGlobalEvent()
         确认
       </button>
     </el-dialog>
+
+    <!-- 全局事件信息版 -->
+    <InfoBoard type="right" :show-info-board="infoBoard.gameGlobalEvent">
+      <template #close-button>
+        <div class="close-button">
+          <a @click="infoBoard.gameGlobalEvent = !infoBoard.gameGlobalEvent">{{ infoBoard.gameGlobalEvent ? "关闭" :
+            "查看事件说明"
+            }}</a>
+        </div>
+      </template>
+      <template #title>
+        <h1 class="title">
+          全局事件说明
+        </h1>
+      </template>
+      <template #content>
+        <div>
+          <p>队长每次抵达遭遇战插旗点时</p>
+          <p>都会刷新 1 - 2 个 全局事件</p>
+          <p>若获得了事件，则必须立即查看该事件</p>
+          <p>全局事件无法放弃，强制执行</p>
+        </div>
+      </template>
+    </InfoBoard>
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '@/assets/styles/globalevent';
 </style>

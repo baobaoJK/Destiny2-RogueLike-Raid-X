@@ -34,6 +34,7 @@
           margin-bottom: 1rem;
           background-image: url('/images/deck/deck-' + #{$i} + ".jpg");
           background-size: cover;
+          border-radius: 2rem;
           transition: all 0.5s;
           cursor: pointer;
 
@@ -61,6 +62,7 @@
           @if ($i==5) {
             box-shadow: 0 0 1rem 0.25rem #6e43cb;
           }
+
         }
       }
 
@@ -76,10 +78,7 @@
 
   .deck-count {
     font-size: 1.25rem;
-  }
-
-  .deck-info {
-    margin-top: 1rem;
+    margin-bottom: 2rem;
   }
 
   // 卡池信息框
@@ -116,16 +115,20 @@
 
       .deck-list-name {
         font-size: 2rem;
+        letter-spacing: 1rem;
       }
     }
 
     .deck-list-box {
       display: flex;
       flex-wrap: wrap;
+      margin: 2rem 0;
 
       @for $i from 1 through 5 {
         &.deck-#{$i} {
           .card {
+            border-radius: 1rem;
+
             @if ($i==1) {
               background-image: url('/images/deck/deck-1.jpg');
               box-shadow: 0 0 1rem 0.25rem #546072;
@@ -211,14 +214,6 @@
             border-radius: 0.25rem;
           }
         }
-      }
-    }
-
-    .deck-confirm-box {
-      margin: 1rem 0;
-
-      button {
-        margin: 0 2rem;
       }
     }
   }

@@ -1,8 +1,16 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { lottery, lotteryByCount } from '@/utils/lottery'
-import { useRaidStore } from '@/stores'
+import { useRaidStore, useUserStore } from '@/stores'
 import { getRaidMapImg } from '@/utils'
+import InfoBoard from "@/components/infoboard/IndexView.vue"
+import { storeToRefs } from 'pinia'
+
+// 地图仓库
+const raidStore = useRaidStore()
+
+// 用户仓库
+const { infoBoard } = storeToRefs(useUserStore())
 
 const mapListRef = ref<HTMLStyleElement>()
 const mapNameRef = ref<HTMLStyleElement>()
@@ -34,7 +42,6 @@ const rollMap = (
 
 // 设置 地图 信息
 const setMapList = () => {
-  const raidStore = useRaidStore()
 
   const maps = raidStore.maps
 
@@ -96,6 +103,29 @@ initMap()
     <button class="button" @click="rollMap(mapListRef, mapNameRef)" :disabled="buttonDisabled">
       抽取地图
     </button>
+
+    <!-- 地图信息版 -->
+    <InfoBoard type="right" :show-info-board="infoBoard.gameMap">
+      <template #close-button>
+        <div class="close-button">
+          <a @click="infoBoard.gameMap = !infoBoard.gameMap">{{ infoBoard.gameMap ? "关闭" : "查看地图说明" }}</a>
+        </div>
+      </template>
+      <template #title>
+        <h1 class="title">
+          地图信息
+        </h1>
+      </template>
+      <template #content>
+        <div>
+          <h2>突袭地图列表</h2>
+          <p>最后一愿、救赎花园、深岩墓室、玻璃拱顶、门徒誓约、国王的陨落、梦魇根源、克洛塔的末日、救赎的边缘（后续可能加入）</p>
+          <hr>
+          <h2>地牢地图列表</h2>
+          <p>破碎王座，异端深渊，预言，贪婪之握，二象性，守望者尖塔，全面爆发，冥冥低语</p>
+        </div>
+      </template>
+    </InfoBoard>
   </div>
 </template>
 

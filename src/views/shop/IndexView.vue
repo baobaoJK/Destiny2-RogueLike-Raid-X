@@ -1,90 +1,67 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { ElMessage } from 'element-plus'
 import { useShopStore, useUserStore } from '@/stores'
-import { lotteryByCount, deckType, deleteCard } from '@/utils'
+import { lotteryByCount, deckType, deleteCard, lightImg } from '@/utils'
+import TipsView from '@/components/tips/IndexView.vue'
+import InfoBoard from '@/components/infoboard/IndexView.vue'
 
-const fixedItems = ref()
-const randomItems = ref()
-const backpackItems = ref()
-const backpackImg = ref()
-const refreshMoney = ref()
-const refreshCount = ref()
-const shopClosed = ref()
-const lightImg = new URL('/images/light.png', import.meta.url).href
-const playerMoney = ref()
+// 商店仓库
+const shopStore = useShopStore()
+const {
+  fixedItems,
+  fixedItemsImg,
+  randomItems,
+  randomItemsImg
+} = storeToRefs(useShopStore())
 
-// 商店价格提高
-const profiteer = ref()
+// 用户仓库
+const userStore = useUserStore()
+const {
+  playerMoney,
+  refreshCount,
+  refreshMoney,
+  backpack,
+  backpackImg,
+  profiteer,
+  infoBoard
+} = storeToRefs(useUserStore())
 
 // 圣水提示框
-const waterDialogVisible = ref()
-
-// 固定售卖图片
-const fixedImg: any = ref([])
+const waterDialogVisible = ref(false)
+const waterDeckList: any = ref([])
 
 // 提示框
-const tooltipShow = ref()
-const tooltipLocation = ref()
-const itemName = ref()
-const itemKind = ref()
-const itemRarity = ref()
-const itemDescription = ref()
-const sellMoney = ref()
-const wrapper = ref()
-const header = ref()
-const waterDeckList: any = ref([])
-const randomItemsImg: any = ref([])
+const tipsRef = ref()
+const tooltipShow = ref(false)
+const tooltipConfig = ref({
+  itemName: '',
+  itemKind: '',
+  itemRarity: '',
+  itemDescription: '',
+  sellMoney: ''
+})
 
-const moveTooltip = (e: any) => {
-  // values: e.clientX, e.clientY, e.pageX, e.pageY
-  const x = e.pageX + 8
-  const y = e.pageY + 8
-
-  tooltipLocation.value = 'translate(' + x + 'px, ' + y + 'px)'
-}
+// 显示提示框
 const showTooltip = (item: any) => {
   tooltipShow.value = true
-  setToolTips(item)
-}
-const hideTooltip = () => {
-  tooltipShow.value = false
-}
-// 设置提示信息
-const setToolTips = (item: any) => {
-  switch (item.rarity) {
-    case '异域':
-      wrapper.value = '#2A271A'
-      header.value = '#CFB444'
-      break
-    case '传说':
-      wrapper.value = '#262727'
-      header.value = '#633F60'
-      break
-    case '稀有':
-      wrapper.value = '#262727'
-      header.value = '#5F81AB'
-      break
-    case '罕见':
-      wrapper.value = '#262727'
-      header.value = '#477B4D'
-      break
-    case '无':
-    default:
-      wrapper.value = '#262727'
-      header.value = '#C6C0B9'
-      break
-  }
 
-  itemName.value = item.itemName
-  itemKind.value = item.kind
-  itemRarity.value = item.rarity
-  itemDescription.value = item.description
-  sellMoney.value = item.sell
+  tooltipConfig.value.itemName = item.itemName
+  tooltipConfig.value.itemKind = item.kind
+  tooltipConfig.value.itemRarity = item.rarity
+  tooltipConfig.value.itemDescription = item.description
+  tooltipConfig.value.sellMoney = item.sell
 
   if (profiteer.value) {
-    sellMoney.value = item.sell + 1
+    tooltipConfig.value.sellMoney = item.sell + 1
   }
+
+  tipsRef.value.setToolTips(item)
+}
+//  关闭提示框
+const hideTooltip = () => {
+  tooltipShow.value = false
 }
 
 // 购买物品
@@ -109,14 +86,13 @@ const buyItem = (item: any, index: number) => {
 
 // 购买圣水
 const buyWater = (item: any) => {
-  const userStore = useUserStore()
-  const sell = ref(item.sell)
+  let sell = item.sell
 
   if (profiteer.value) {
-    sell.value += 1
+    sell += 1
   }
 
-  if (userStore.playerMoney < sell.value) {
+  if (userStore.playerMoney < sell) {
     ElMessage({
       message: '货币不足无法购买',
       grouping: true,
@@ -126,25 +102,28 @@ const buyWater = (item: any) => {
   }
 
   const itemName = item.name
-  const cardType = ref('')
+  let cardType = ''
 
   switch (itemName) {
     case 'water1':
-      cardType.value = deckType[3]
+      cardType = deckType[3]
       break
     case 'water2':
-      cardType.value = deckType[4]
+      cardType = deckType[4]
       break
     case 'water3':
-      cardType.value = deckType[5]
+      cardType = deckType[5]
+      break
+    case 'water7':
+      cardType = deckType[6]
       break
     default:
       break
   }
 
-  waterDeckList.value = userStore.deckList[cardType.value]
+  waterDeckList.value = userStore.deckList[cardType]
 
-  if (waterDeckList.value.length == 0) {
+  if (waterDeckList.value.length === 0) {
     ElMessage({
       message: '当前没有可以消除的卡牌',
       grouping: true,
@@ -158,11 +137,10 @@ const buyWater = (item: any) => {
 
 // 购买抽卡机会
 const buyDrawCount = (item: any) => {
-  const userStore = useUserStore()
-  const sell = item.sell
+  let sell = item.sell
 
   if (profiteer.value) {
-    sell.value += 1
+    sell += 1
   }
 
   if (userStore.playerMoney < sell) {
@@ -176,7 +154,6 @@ const buyDrawCount = (item: any) => {
 
   userStore.playerMoney -= sell
   userStore.drawCount += 1
-  playerMoney.value = userStore.playerMoney
 
   ElMessage({
     message: '您已增加一次抽卡机会',
@@ -187,16 +164,13 @@ const buyDrawCount = (item: any) => {
 
 // 购买物品
 const buyRandomItem = (item: any, index: number) => {
-  const userStore = useUserStore()
-  // 货币
-  const money = userStore.playerMoney
+  // 售价
   let sell = item.sell
 
   if (profiteer.value) sell += 1
-  console.log(userStore.market)
 
   // 货币不足
-  if (money < sell && !userStore.market) {
+  if (userStore.playerMoney < sell && !userStore.market) {
     ElMessage({
       message: '货币不足无法购买',
       grouping: true,
@@ -206,8 +180,7 @@ const buyRandomItem = (item: any, index: number) => {
   }
 
   // 购买成功
-  userStore.playerMoney = money - sell
-  playerMoney.value = userStore.playerMoney
+  userStore.playerMoney -= sell
 
   item.count--
 
@@ -220,9 +193,6 @@ const buyRandomItem = (item: any, index: number) => {
   userStore.backpack.push(item)
   userStore.backpackImg.push(randomItemsImg.value[index])
 
-  backpackItems.value = userStore.backpack
-  backpackImg.value = userStore.backpackImg
-
   ElMessage({
     message: '购买 ' + item.itemName + ' 成功',
     grouping: true,
@@ -232,7 +202,6 @@ const buyRandomItem = (item: any, index: number) => {
 
 // 删除卡牌
 const deleteCardItem = (card: any, index: number) => {
-  const userStore = useUserStore()
   let sell = 0
 
   switch (card.type) {
@@ -244,6 +213,9 @@ const deleteCardItem = (card: any, index: number) => {
       break
     case deckType[5]:
       sell = 12
+      break;
+    case deckType[6]:
+      sell = 7
       break
     default:
       break
@@ -266,18 +238,20 @@ const deleteCardItem = (card: any, index: number) => {
   waterDeckList.value.splice(index, 1)
 
   userStore.playerMoney -= sell
-  playerMoney.value = userStore.playerMoney
+
+  if (waterDeckList.value.length === 0) {
+    waterDialogVisible.value = false
+  }
 }
 
 // 刷新商店按钮
 const refreshShop = () => {
-  const userStore = useUserStore()
   const refreshMod = userStore.refreshCount >= 1 ? 'free' : 'pay'
 
   if (refreshMod === 'free') {
-    refreshCount.value -= 1
     userStore.refreshCount--
-  } else if (refreshMod === 'pay') {
+  }
+  else if (refreshMod === 'pay') {
     if (userStore.playerMoney - userStore.refreshMoney < 0) {
       ElMessage({
         message: '货币不足',
@@ -289,9 +263,6 @@ const refreshShop = () => {
 
     userStore.playerMoney -= userStore.refreshMoney
     userStore.refreshMoney += 1
-
-    refreshMoney.value = userStore.refreshMoney
-    playerMoney.value = userStore.playerMoney
   }
 
   refreshShopItem()
@@ -299,14 +270,12 @@ const refreshShop = () => {
 
 // 刷新商店
 const refreshShopItem = () => {
-  const shopStore = useShopStore()
   shopStore.randomItems[0] = lotteryByCount(shopStore.weapons.weapons1)
   shopStore.randomItems[1] = lotteryByCount(shopStore.weapons.weapons2)
   shopStore.randomItems[2] = lotteryByCount(shopStore.weapons.weapons3)
   shopStore.randomItems[3] = lotteryByCount(shopStore.weapons.exotic)
 
   // 检测角色类型
-  const userStore = useUserStore()
   switch (userStore.role) {
     case 'titan':
       shopStore.randomItems[4] = lotteryByCount(shopStore.armor.titanArmor)
@@ -321,42 +290,21 @@ const refreshShopItem = () => {
       break
   }
 
-  randomItems.value = shopStore.randomItems
+  shopStore.setRandomItemsImg()
 
-  setRandomItemsImg()
-}
+  // 判断是否有窃取
+  if (userStore.steal) {
+    for (let i = 0; i < 5; i++) {
+      userStore.backpack.push(shopStore.randomItems[i])
+      userStore.backpackImg.push(randomItemsImg.value[i])
+    }
 
-// 随机商店物品图片
-const setRandomItemsImg = () => {
-  const shopStore = useShopStore()
-  const userStore = useUserStore()
-
-  if (shopStore.randomItems[0].itemName === '空物品') return
-  randomItemsImg.value[0] = new URL(
-    '/images/shop/weapons1/' + shopStore.randomItems[0].itemName + '.jpg',
-    import.meta.url
-  ).href
-  randomItemsImg.value[1] = new URL(
-    '/images/shop/weapons2/' + shopStore.randomItems[1].itemName + '.jpg',
-    import.meta.url
-  ).href
-  randomItemsImg.value[2] = new URL(
-    '/images/shop/weapons3/' + shopStore.randomItems[2].itemName + '.jpg',
-    import.meta.url
-  ).href
-  randomItemsImg.value[3] = new URL(
-    '/images/shop/exotic/' + shopStore.randomItems[3].itemName + '.jpg',
-    import.meta.url
-  ).href
-  randomItemsImg.value[4] = new URL(
-    '/images/shop/' + userStore.role + '/' + shopStore.randomItems[4].itemName + '.jpg',
-    import.meta.url
-  ).href
+    userStore.steal = false
+  }
 }
 
 // 开启商店
 const openShop = () => {
-  const userStore = useUserStore()
   const sell = 12
 
   if (userStore.playerMoney < sell) {
@@ -374,73 +322,40 @@ const openShop = () => {
   userStore.deckList[deckType[5]].forEach((card: any) => {
     if (card.name == name) {
       deleteCard(card)
+
+      ElMessage({
+        message: '你已重新开启商店系统',
+        grouping: true,
+        type: 'success'
+      })
+
+      return;
     }
   })
-
-  ElMessage({
-    message: '你已重新开启商店系统',
-    grouping: true,
-    type: 'success'
-  })
-  shopClosed.value = false
 }
 
 // 商店初始化
 const initShop = () => {
-  const shopStore = useShopStore()
-  const userStore = useUserStore()
 
-  fixedItems.value = shopStore.fixedItems
-  randomItems.value = shopStore.randomItems
-  backpackItems.value = userStore.backpack
-  backpackImg.value = userStore.backpackImg
-  refreshMoney.value = userStore.refreshMoney
-  refreshCount.value = userStore.refreshCount
-  shopClosed.value = false
-  profiteer.value = false
-  waterDialogVisible.value = false
-  fixedImg.value[0] = new URL('/images/shop/water.jpg', import.meta.url).href
-  fixedImg.value[1] = new URL('/images/shop/water.jpg', import.meta.url).href
-  fixedImg.value[2] = new URL('/images/shop/water.jpg', import.meta.url).href
-  fixedImg.value[3] = new URL('/images/shop/card.png', import.meta.url).href
-  tooltipShow.value = false
-  tooltipLocation.value = 'translate(0px, 0px)'
-  itemName.value = '合成感受器'
-  itemKind.value = '臂铠'
-  itemRarity.value = '异域'
-  itemDescription.value = '这是一个泰坦的臂铠'
-  sellMoney.value = 0
-  wrapper.value = '#2A271A'
-  header.value = '#CFB444'
-  playerMoney.value = userStore.playerMoney
-  // 商店检测
-  userStore.deckList[deckType[5]].forEach((card: any) => {
-    if (card.name == 'Stillwater-Prison') {
-      ElMessage({
-        message: '您的商店系统已被关闭！',
-        type: 'error',
-        duration: 0,
-        showClose: true
-      })
-
-      shopClosed.value = true
-      return
-    }
-  })
+  // 静水监狱
+  if (userStore.shopClosed) {
+    ElMessage({
+      message: '您的商店系统已被关闭！',
+      type: 'error',
+      duration: 0,
+      showClose: true
+    })
+  }
 
   // 价格检测
-  userStore.deckList[deckType[4]].forEach((card: any) => {
-    if (card.name == 'Reicher-Playboy') {
-      profiteer.value = true
-      ElMessage({
-        message: '购买任意物品价格提高 1 货币！',
-        grouping: true,
-        duration: 0,
-        showClose: true
-      })
-      return
-    }
-  })
+  if (profiteer.value) {
+    ElMessage({
+      message: '购买任意物品价格提高 1 货币！',
+      grouping: true,
+      duration: 0,
+      showClose: true
+    })
+  }
 
   // 恶魔契约检测
   if (userStore.devilspact != 0) {
@@ -452,7 +367,16 @@ const initShop = () => {
     })
   }
 
-  setRandomItemsImg()
+  // 未来市场
+  if (userStore.market) {
+    ElMessage({
+      message: '未来市场已启用',
+      grouping: true,
+      duration: 0,
+      showClose: true
+    })
+  }
+
   // console.log(shopStore.randomItems)
 }
 // 初始化
@@ -460,38 +384,38 @@ initShop()
 </script>
 
 <template>
-  <div id="shop" @mousemove="moveTooltip($event)">
-    <div id="tooltip" :class="{ show: tooltipShow }" :style="{ transform: tooltipLocation }">
-      <div class="wrapper" :style="{ 'background-color': wrapper }">
-        <div class="header" :style="{ 'background-color': header }">
-          <div class="name">{{ itemName }}</div>
-          <div class="type">
-            <div class="kind">{{ itemKind }}</div>
-            <div class="rarity">{{ itemRarity }}</div>
+  <div id="shop" @mousemove="tipsRef.moveTooltip($event)">
+
+    <!-- 提示框 -->
+    <TipsView ref="tipsRef" :tooltipShow="tooltipShow">
+      <template #header>
+        <div class="name">{{ tooltipConfig.itemName }}</div>
+        <div class="type">
+          <div class="kind">{{ tooltipConfig.itemKind }}</div>
+          <div class="rarity">{{ tooltipConfig.itemRarity }}</div>
+        </div>
+      </template>
+      <template #main>
+        <div class="description">
+          <div class="text">
+            <p class="type">{{ tooltipConfig.itemDescription }}</p>
           </div>
         </div>
-        <div class="main">
-          <div class="description">
-            <div class="text">
-              <p class="type">{{ itemDescription }}</p>
-            </div>
+        <div class="line"></div>
+        <div class="monetary">
+          <div class="name">
+            <img class="light" :src="lightImg" alt="light.png" />
+            <p>光尘货币</p>
           </div>
-          <div class="line"></div>
-          <div class="monetary">
-            <div class="name">
-              <img class="light" :src="lightImg" alt="light.png" />
-              <p>光尘货币</p>
-            </div>
-            <div class="info">
-              <p class="text">
-                <span class="money">{{ playerMoney }}</span> /
-                <span class="sell">{{ sellMoney }}</span>
-              </p>
-            </div>
+          <div class="info">
+            <p class="text">
+              <span class="money">{{ playerMoney }}</span> /
+              <span class="sell">{{ tooltipConfig.sellMoney }}</span>
+            </p>
           </div>
         </div>
-      </div>
-    </div>
+      </template>
+    </TipsView>
 
     <div class="shop-list">
       <div class="shop-top">
@@ -510,7 +434,7 @@ initShop()
         <div class="item-list">
           <div v-for="(item, index) in fixedItems" :key="item" class="item" @mousemove="showTooltip(item)"
             @mouseout="hideTooltip()" @click="buyItem(item, index)"
-            :style="{ 'background-image': `url(${fixedImg[index]})` }"></div>
+            :style="{ 'background-image': `url(${fixedItemsImg[index]})` }"></div>
         </div>
       </div>
 
@@ -531,8 +455,11 @@ initShop()
         <hr class="backpack-line" />
       </div>
 
-      <div class="item-list">
-        <div v-for="(item, index) in backpackItems" :key="index" class="item"
+      <div class="item-list" v-if="backpack.length === 0">
+        <h1>当前背包无物品</h1>
+      </div>
+      <div class="item-list" v-else>
+        <div v-for="(item, index) in backpack" :key="index" class="item"
           :style="{ 'background-image': `url(${backpackImg[index]})` }"></div>
       </div>
     </div>
@@ -559,9 +486,46 @@ initShop()
     </el-dialog>
 
     <!-- 商店关闭模态框 -->
-    <div class="shop-closed" v-if="shopClosed">
+    <div class="shop-closed" v-if="userStore.shopClosed">
       <button class="button open-shop" @click="openShop">开启商店</button>
     </div>
+
+    <!-- 商店信息版 -->
+    <InfoBoard type="right" :show-info-board="infoBoard.gameShop">
+      <template #close-button>
+        <div class="close-button">
+          <a @click="infoBoard.gameShop = !infoBoard.gameShop">{{ infoBoard.gameShop ? "关闭" :
+            "查看商店说明"
+            }}</a>
+        </div>
+      </template>
+      <template #title>
+        <h1 class="title">
+          商店说明
+        </h1>
+      </template>
+      <template #content>
+        <div>
+          <p>随机售卖栏不会自己刷新，每轮遭遇战可获得一次免费随机售卖栏刷新机会，不可叠加</p>
+          <p>免费刷新使用后可使用货币付费刷新，第一次刷新消耗1单位货币，第二次刷新消耗2单位货币，以此类推，付费刷新消耗不重置</p>
+          <p>商店除遭遇战进行中都可以使用，打遭遇战团灭了之后到下一次开打前也可以使用</p>
+          <hr>
+          <p>固定售卖</p>
+          <p>1阶圣水，可消除一张微弱不适卡牌，售价3单位货币</p>
+          <p>2阶圣水，可消除一张重度不适卡牌，售价6单位货币</p>
+          <p>3阶圣水，可消除一张反人类卡牌，售价12单位货币</p>
+          <p>7阶圣水，可消除一张特殊卡牌，售价7单位货币</p>
+          <p>卡牌抽取机会一次，售价3单位货币</p>
+          <hr>
+          <p>随机售卖</p>
+          <p>随机售卖栏1：【白弹】自动步枪、斥候、脉冲、手炮、微冲、手枪、弓箭自选（售价1单位货币）</p>
+          <p>随机售卖栏2：【绿弹】霰弹、榴弹、聚合、狙击、追踪、偃月自选（售价3单位货币）</p>
+          <p>随机售卖栏3：【重弹】刀剑、榴弹、筒子、线融、机枪自选（售价6单位货币）</p>
+          <p>随机售卖栏4：异域武器（售价6单位货币）</p>
+          <p>随机售卖栏5：异域护甲（售价6单位货币）</p>
+        </div>
+      </template>
+    </InfoBoard>
   </div>
 </template>
 

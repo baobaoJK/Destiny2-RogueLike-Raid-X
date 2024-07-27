@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 export const useUserStore = defineStore(
   'user',
@@ -16,16 +16,87 @@ export const useUserStore = defineStore(
     const playerMoney = ref(0)
     // 玩家抽卡次数
     const drawCount = ref(0)
-    //
-    const closeDeck = ref(false)
     // 商店刷新次数
     const refreshCount = ref(0)
     // 商店刷新花费
     const refreshMoney = ref(1)
-    //
+    // 恶魔契约
     const devilspact = ref(0)
-    //
-    const market = ref(false)
+    // 未来市场
+    const market = computed(() => {
+      const card = deckList.value.Technology.find((card: any) => card.name === `Future's-Market`)
+      return card !== undefined ? true : false
+    })
+    // 纨绔子弟
+    const profiteer = computed(() => {
+      const card = deckList.value.StrongDiscomfort.find(
+        (card: any) => card.name === 'Reicher-Playboy'
+      )
+      return card !== undefined ? true : false
+    })
+    // 静水监狱
+    const shopClosed = computed(() => {
+      const card = deckList.value.Unacceptable.find(
+        (card: any) => card.name === 'Stillwater-Prison'
+      )
+      return card !== undefined ? true : false
+    })
+    // 赌徒
+    const gambler = computed(() => {
+      const card = deckList.value.Technology.find((card: any) => card.name === 'Gambler')
+      return card !== undefined ? true : false
+    })
+    // 戒赌
+    const deckClosed = computed(() => {
+      const card = deckList.value.Unacceptable.find((card: any) => card.name === 'Quit-Gambling')
+      return card !== undefined ? true : false
+    })
+    // 免死金牌
+    const compensate = computed(() => {
+      const card = deckList.value.Opportunity.find((card: any) => card.name === 'The-Medallion')
+      return card !== undefined ? false : true
+    })
+    // 苦肉计
+    const torture = computed(() => {
+      const card = deckList.value.Technology.find(
+        (card: any) => card.name === 'The-Self-Torture-Scheme'
+      )
+      return card !== undefined ? true : false
+    })
+    // 不，你不能...
+    const random = computed(() => {
+      const card = deckList.value.Technology.find((card: any) => card.name === 'You-Cant')
+      return card !== undefined ? true : false
+    })
+    // 卡牌回收计划
+    const program = computed(() => {
+      const card = deckList.value.Technology.find(
+        (card: any) => card.name === 'Card-Recycling-Program'
+      )
+      return card !== undefined ? true : false
+    })
+    // 观星
+    const stargazing = computed(() => {
+      const card = deckList.value.Technology.find((card: any) => card.name === 'Stargazing')
+      return card !== undefined ? true : false
+    })
+    // 不吃这套
+    const noDeal = computed(() => {
+      const card = deckList.value.Technology.find((card: any) => card.name === 'I-Wont-Eat-This')
+      return card !== undefined ? true : false
+    })
+    // 不是哥们！
+    const noBuddy = computed(() => {
+      const card = deckList.value.Technology.find((card: any) => card.name === 'No-Buddy')
+      return card !== undefined ? true : false
+    })
+    // 十三幺
+    const thirteen = computed(() => {
+      const card = deckList.value.Technology.find((card: any) => card.name === 'Thirteen-Orphans')
+      return card !== undefined ? true : false
+    })
+    // 窃取
+    const steal = ref(false)
     // 玩家背包
     const backpack: any = ref([])
     // 玩家背包物品图片
@@ -38,6 +109,18 @@ export const useUserStore = defineStore(
     const playerEventList: any = ref([])
     // 玩家全局事件
     const globalEventList: any = ref([])
+    // 信息版配置
+    const infoBoard = ref({
+      gameMap: false,
+      gamePlay: true,
+      gameChallenge: true,
+      gameDeck: false,
+      gameDeckList: false,
+      gameBounty: false,
+      gamePlayerEvent: false,
+      gameGlobalEvent: false,
+      gameShop: false
+    })
 
     //  设置用户信息
     const setUserInfo = async (newUserInfo: any) => {
@@ -95,17 +178,22 @@ export const useUserStore = defineStore(
         isCaptain,
         playerMoney,
         drawCount,
-        closeDeck,
         refreshCount,
         refreshMoney,
         devilspact,
         market,
+        profiteer,
+        shopClosed,
+        gambler,
+        compensate,
+        deckClosed,
         backpack,
         backpackImg,
         deckList,
         bountyList,
         playerEventList,
-        globalEventList
+        globalEventList,
+        infoBoard
       }
     }
 
@@ -117,17 +205,27 @@ export const useUserStore = defineStore(
       isCaptain.value = false
       playerMoney.value = 0
       drawCount.value = 0
-      closeDeck.value = false
       refreshCount.value = 0
       refreshMoney.value = 1
       devilspact.value = 0
-      market.value = false
       backpack.value = []
       backpackImg.value = []
       deckList.value = {}
       bountyList.value = []
       playerEventList.value = []
       globalEventList.value = []
+      steal.value = false
+      infoBoard.value = {
+        gameMap: false,
+        gamePlay: true,
+        gameChallenge: true,
+        gameDeck: false,
+        gameDeckList: false,
+        gameBounty: false,
+        gamePlayerEvent: false,
+        gameGlobalEvent: false,
+        gameShop: false
+      }
     }
 
     return {
@@ -137,17 +235,30 @@ export const useUserStore = defineStore(
       isCaptain,
       playerMoney,
       drawCount,
-      closeDeck,
       refreshCount,
       refreshMoney,
       devilspact,
       market,
+      profiteer,
+      shopClosed,
+      gambler,
+      compensate,
+      torture,
+      random,
+      program,
+      stargazing,
+      noDeal,
+      noBuddy,
+      thirteen,
+      steal,
+      deckClosed,
       backpack,
       backpackImg,
       deckList,
       bountyList,
       playerEventList,
       globalEventList,
+      infoBoard,
       getUserInfo,
       setUserInfo,
       reset

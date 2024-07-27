@@ -23,10 +23,11 @@
     .deck-top {
       width: 100%;
       height: 3.125rem;
+      margin-bottom: 2rem;
 
       // 卡牌名称
       .deck-title {
-        width: 50%;
+        width: 10%;
         height: auto;
         float: left;
         font-size: 2rem;
@@ -43,13 +44,10 @@
         display: flex;
         flex-direction: row-reverse;
         align-items: center;
-        width: 50%;
+        width: 90%;
         height: auto;
         float: left;
 
-        button {
-          margin: 0 0 0 1rem;
-        }
       }
 
       // 卡牌分割线
@@ -68,8 +66,6 @@
       justify-content: center;
       width: 90%;
       height: auto;
-      margin-top: 1rem;
-      margin-bottom: 1rem;
 
       .card-list-header {
         width: 100%;
@@ -104,6 +100,7 @@
           background-position: center;
           background-size: cover;
           box-shadow: 0 0 1rem 0.25rem #7fe4c5;
+          border-radius: 1rem;
         }
 
         .card-info {
@@ -115,6 +112,7 @@
           height: 90%;
           background-color: #0008;
           text-align: center;
+          border-radius: 1rem;
         }
 
         .card-name {
@@ -134,19 +132,21 @@
     }
   }
 
-  .dialog {
-    box-shadow: 0 0 1.25rem #7fe4c5 !important;
-    clip-path: none;
+  .card-dialog,
+  .shuffle-dialog,
+  .random-dialog {
 
     .title {
       color: white;
       font-weight: 100;
       font-size: 2.5rem;
+      letter-spacing: 0.5rem;
     }
 
     .box {
       display: flex;
       flex-wrap: wrap;
+      justify-content: center;
       margin: 2rem 0;
 
       .item {
@@ -156,13 +156,13 @@
         justify-content: center;
         position: relative;
         width: 8.125rem;
-        height: 15.75rem;
-        margin: 1rem 2rem;
+        height: 13.75rem;
+        margin: 2rem;
         transition: opacity 0.3s;
         cursor: pointer;
 
         &:hover {
-          opacity: 0.8;
+          opacity: 0.6;
         }
 
         .card {
@@ -174,6 +174,7 @@
           height: 13.75rem;
           background-image: url('/images/deck/deck-2.jpg');
           background-size: cover;
+          border-radius: 0.5rem;
           box-shadow: 0 0 1.25rem #7fe4c5;
           transition: opacity 0.3s;
 
@@ -192,66 +193,6 @@
           }
         }
       }
-    }
-
-    button {
-      margin: 0 2rem;
-    }
-  }
-
-  .random-dialog {
-    height: 45rem !important;
-    padding-top: 2rem;
-
-    .random-list-box {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      height: 30rem;
-      overflow-y: auto;
-    }
-  }
-
-  .card-dialog {
-    height: 45rem !important;
-    padding-top: 2rem;
-    clip-path: none;
-
-    .card-list-box {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      height: 30rem;
-      overflow-y: auto;
-
-      // 卡牌列表
-      .card-list {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-        width: 90%;
-        height: auto;
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-
-        .card-list-header {
-          width: 100%;
-
-          h2 {
-            font-size: 1.5rem;
-            font-weight: 100;
-          }
-
-          .deck-line {
-            border: 1px solid white;
-          }
-        }
-      }
-    }
-
-    button {
-      width: 20rem !important;
     }
   }
 }

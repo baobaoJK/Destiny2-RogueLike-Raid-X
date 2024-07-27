@@ -2,6 +2,11 @@ import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRaidStore } from '@/stores'
 
+// 货币图片
+export const lightImg = new URL('/images/light.png', import.meta.url).href
+// 卡片图片
+export const cardImg = new URL('/images/card.png', import.meta.url).href
+
 // 获取突袭地图图片
 export const getRaidMapImg = (mapName: string) => {
   return new URL('/images/maps/raid/' + mapName + '.jpg', import.meta.url).href

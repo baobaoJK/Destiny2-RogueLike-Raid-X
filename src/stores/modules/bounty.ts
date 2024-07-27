@@ -6,7 +6,7 @@ export const useBountyStore = defineStore(
   'bounty',
   () => {
     // 赏金列表
-    const bounty = ref([])
+    const bounty: any = ref([])
 
     // 获取赏金列表
     const getBountyList = async () => {

@@ -69,107 +69,86 @@ body {
       opacity: 0.5;
     }
   }
-}
 
-// 模态框
-.dialog {
+  // 游戏检测模态框
+  .game-dialog {
+    clip-path: polygon(5rem 0%, 100% 0%, 100% calc(100% - 5rem), calc(100% - 5rem) 100%, 0 100%, 0% 5rem) !important;
 
-
-  .title {
-    font-weight: 100;
-    font-size: 2rem;
-    margin-bottom: 1rem;
-  }
-
-  .box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 1rem;
+    .game-logo {
+      width: 8rem;
+      height: auto;
+      margin: 1rem 0;
+    }
 
     .title {
-      font-size: 1.25rem;
-      margin-bottom: 1rem;
-    }
-
-    p {
-      font-size: 1rem;
-      text-align: center;
-      margin-bottom: 0.5rem;
-    }
-
-    label {
-      font-size: 1rem;
-    }
-  }
-
-  .name-box {
-    margin-bottom: 2rem;
-
-    p {
-      font-size: 1.25rem;
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-  }
-
-  button {
-    margin: 0 2rem;
-  }
-}
-
-// 游戏检测模态框
-.el-dialog {
-  clip-path: polygon(5rem 0%, 100% 0%, 100% calc(100% - 5rem), calc(100% - 5rem) 100%, 0 100%, 0% 5rem) !important;
-}
-
-.game-dialog {
-  .game-logo {
-    width: 8rem;
-    height: auto;
-    margin: 1rem 0;
-  }
-
-  .game-config {
-    font-size: 1.5rem !important;
-    margin-bottom: 1rem;
-  }
-
-  .links {
-    margin: 0.25rem 0 1rem 0;
-
-    .link {
+      font-weight: 100;
       font-size: 2rem;
-      color: white;
-      margin: 0 1rem;
-      transition: opacity 0.3s;
+      margin-bottom: 1rem;
+    }
 
-      &:hover {
-        opacity: 0.5;
+    .box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      p {
+        font-size: 1rem;
+        text-align: center;
+        margin-bottom: 0.5rem;
       }
 
-      &:nth-child(1) {
-        color: rgb(23, 189, 255);
+      .game-config {
+        font-size: 1.5rem !important;
+        margin-bottom: 1rem;
+        color: orange;
       }
 
-      &:nth-child(2) {
-        color: rgba(255, 67, 192, 0.96);
+      .links {
+        margin: 0.25rem 0 1rem 0;
+
+        .link {
+          font-size: 2rem;
+          margin: 0 1rem;
+          transition: opacity 0.3s;
+
+          &:hover {
+            opacity: 0.5;
+          }
+
+          &:nth-child(1) {
+            color: rgb(67, 192, 255);
+          }
+
+          &:nth-child(2) {
+            color: rgb(255, 67, 155);
+          }
+        }
+      }
+
+      .game-save {
+        span {
+          font-size: 1.25rem;
+          color: #4dffc4;
+        }
+      }
+
+      .game-web {
+        .edge {
+          font-size: 1.25rem;
+          color: #5b8eff;
+        }
+
+        .chrome {
+          font-size: 1.25rem;
+          color: orange;
+        }
+      }
+
+      .game-time {
+        font-size: 2rem !important;
+        color: #6e43cb;
       }
     }
-  }
-
-  .edge {
-    font-size: 1.25rem;
-    color: #5b8eff;
-  }
-
-  .chrome {
-    font-size: 1.25rem;
-    color: orange;
-  }
-
-  .game-time {
-    font-size: 2rem !important;
-    color: #6e43cb;
   }
 }

@@ -55,15 +55,43 @@ defineExpose({
 <template>
     <el-dialog class="dialog value-dialog" v-model="visible" :close-on-click-modal="false" width="25rem" align-center>
         <div class="value-input-box">
-            <label for="money">{{ props.title }}：</label>
-            <el-input-number v-model="valueInput" :min="-100" :max="100" @change="handleChange" id="money" />
+            <label for="value">{{ props.title }}：</label>
+            <el-input-number v-model="valueInput" :min="-100" :max="100" @change="handleChange" id="value" />
         </div>
         <div class="buttons">
-            <button type="button" class="button money-cancel" @click="close">
-                取消
+            <button type="button" class="button value-cancel" @click="close">
+                关闭
             </button>
         </div>
     </el-dialog>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss">
+// 货币/抽卡次数模态框样式
+.value-dialog {
+    clip-path: polygon(3rem 0%, 100% 0%, 100% calc(100% - 3rem), calc(100% - 3rem) 100%, 0 100%, 0% 3rem) !important;
+
+    .value-input-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 80%;
+
+        label {
+            color: white;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+    }
+
+    .buttons {
+        display: flex;
+        margin-top: 1rem;
+
+        button {
+            padding: 0.25rem 4em;
+        }
+    }
+}
+</style>

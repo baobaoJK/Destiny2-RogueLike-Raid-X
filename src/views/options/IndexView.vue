@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { ElMessage } from 'element-plus'
 import { useBountyStore, useEventStore, useRaidStore, useUserStore } from '@/stores'
 import {
@@ -7,24 +8,86 @@ import {
   lottery,
   lotteryByCount,
   shuffle,
-  deckType,
-  getDeckListTypeCount,
   checkRaidMap,
   randomNum,
-  checkList
 } from '@/utils'
 import ChangeValue from './components/ChangeValue.vue'
+import InfoBoard from "@/components/infoboard/IndexView.vue"
+
+// 用户信息
+const userStore = useUserStore()
+const { infoBoard } = storeToRefs(useUserStore())
+
+// 突袭地图信息
+const raidStore = useRaidStore()
+const { maps } = storeToRefs(useRaidStore())
+
+// 事件信息
+const eventStore = useEventStore()
+
+// 赏金信息
+const bountyStore = useBountyStore()
+
+
+// 游戏挑战信息
+const gameChallengeData = ref([
+  {
+    mapName: '最后一愿',
+    level: '普通',
+    name: '未来愿望',
+    description: '去许愿墙播放《未来愿望》，获得 3 个货币'
+  },
+  {
+    mapName: '救赎花园',
+    level: '简单',
+    name: '无',
+    description: '无'
+  },
+  {
+    mapName: '深岩墓室',
+    level: '普通',
+    name: '深海派克',
+    description: '运送 n 辆派克抵达终点，则获得 n 个货币'
+  },
+  {
+    mapName: '玻璃拱顶',
+    level: '简单',
+    name: '完美塔防',
+    description: '防守区域时，没有任何米诺陶进入区域重置节点时，可以获得 3 个货币'
+  },
+  {
+    mapName: '门徒誓约',
+    level: '困难',
+    name: '完好无损',
+    description: '运送目标时，没有任何人死亡，可以获得 6 个货币'
+  },
+  {
+    mapName: '国王的陨落',
+    level: '困难',
+    name: '接触暗影',
+    description: '开门关时，不破坏黑球的情况下完成开门关，可以获得 6 个货币或单左双右完成开门关，可以获得 3 个货币'
+  },
+  {
+    mapName: '梦魇根源',
+    level: '简单',
+    name: '无',
+    description: '无'
+  },
+  {
+    mapName: '克洛塔的末日',
+    level: '普通',
+    name: '无',
+    description: '无'
+  }
+])
 
 // 读取游戏信息
-const maps = ref()
 const mapName = ref('请选择地图')
 
 // 提示框
 const mapDialogVisible = ref(false)
-const dialog = ref()
-const dialogVisible = ref(true)
-const dialogTitle = ref('')
-const dialogType = ref('')
+const valueDialog = ref()
+const valueDialogTitle = ref('')
 
 // 按钮
 const mapDoorButtonDisabled = ref(false)
@@ -52,7 +115,6 @@ const chestStepWidth = ref(0)
 
 // 选择地图
 const setMap = (map: any) => {
-  const raidStore = useRaidStore()
   raidStore.map = map
   raidStore.mapId = map.id
   raidStore.level = map.level
@@ -70,6 +132,19 @@ const setMap = (map: any) => {
   setMapInfo()
 }
 
+// 设置地图信息
+const setMapInfo = () => {
+  if (raidStore.map != '' && raidStore.map != null) {
+    mapName.value = raidStore.map.name
+    mapSteps.value = raidStore.map.level
+    mapStepNum.value = raidStore.levelPoint
+    mapStepWidth.value = 100 / Number(mapSteps.value)
+    chestSteps.value = raidStore.chest
+    chestStepNum.value = raidStore.chestPoint
+    chestStepWidth.value = 100 / Number(chestSteps.value)
+  }
+}
+
 // 遭遇战插旗点
 const mapDoor = () => {
 
@@ -79,20 +154,13 @@ const mapDoor = () => {
   // 判断插旗点
   if (mapStepNum.value > mapSteps.value + 1) return
 
-  // 赏金任务
-  const bountyStore = useBountyStore()
+  // 抽取赏金任务
   const bountyList = []
-
-  // 循环抽取赏金任务
-  while (bountyList.length != 3) {
-    let bounty = lottery(bountyStore.bounty)
-    if (checkList(bountyList, bounty)) {
-      bountyList.push(bounty)
-    }
-  }
+  bountyList.push(lottery(bountyStore.bounty.human))
+  bountyList.push(lottery(bountyStore.bounty.guardian))
+  bountyList.push(lottery(bountyStore.bounty.killer))
 
   // 设置赏金任务 与 添加抽卡次数
-  const userStore = useUserStore()
   userStore.bountyList = bountyList
   userStore.drawCount += 2
 
@@ -129,7 +197,6 @@ const mapNext = () => {
 
   // 判断当前进度
   if (mapStepNum.value <= mapSteps.value) {
-    const raidStore = useRaidStore()
     mapStepNum.value += 1
 
     if (mapStepNum.value == 2) {
@@ -138,7 +205,6 @@ const mapNext = () => {
     }
 
     // 修改用户信息
-    const userStore = useUserStore()
     const randomMoney = randomNum(1, 3)
     userStore.playerMoney += randomMoney
     raidStore.levelPoint = mapStepNum.value
@@ -150,36 +216,20 @@ const mapNext = () => {
     })
 
     // 判断是否有免死金牌
-    let compensate = true
-    userStore.deckList[deckType[2]].forEach((card: any) => {
-      if (card.name == 'The-Medallion') {
-        compensate = false
-      }
-    })
-
-    // 负面补偿
-    if (compensate) {
+    if (userStore.compensate) {
       // 负面检测
       const debuffTestCount = ref(0)
 
-      const microDiscomfortListCount = getDeckListTypeCount(
-        userStore.deckList[deckType[3]],
-        deckType[3]
-      )
-      const strongDiscomfortListCount = getDeckListTypeCount(
-        userStore.deckList[deckType[4]],
-        deckType[4]
-      )
-      const unacceptableListCount = getDeckListTypeCount(
-        userStore.deckList[deckType[5]],
-        deckType[5]
-      )
+      // 负面补偿
+      const microDiscomfortListCount = computed(() => userStore.deckList.MicroDiscomfort.length)
+      const strongDiscomfortListCount = computed(() => userStore.deckList.StrongDiscomfort.length)
+      const unacceptableListCount = computed(() => userStore.deckList.Unacceptable.length)
 
-      debuffTestCount.value += microDiscomfortListCount
-      debuffTestCount.value += strongDiscomfortListCount * 2
-      debuffTestCount.value += unacceptableListCount * 3
+      debuffTestCount.value += microDiscomfortListCount.value
+      debuffTestCount.value += strongDiscomfortListCount.value * 2
+      debuffTestCount.value += unacceptableListCount.value * 3
 
-      console.log(debuffTestCount.value)
+      // console.log(debuffTestCount.value)
 
       if (debuffTestCount.value > 0) {
         ElMessage({
@@ -209,10 +259,8 @@ const nextChest = () => {
   if (chestStepNum.value <= chestSteps.value) {
     chestStepNum.value += 1
 
-    const raidStore = useRaidStore()
     raidStore.chestPoint = chestStepNum.value
 
-    const userStore = useUserStore()
     const randomMoney = randomNum(1, 3)
     userStore.playerMoney += randomMoney
 
@@ -237,13 +285,13 @@ const showDialog = (type: string) => {
 
   // 判断是什么类型的模态框
   if (type == 'money') {
-    dialogTitle.value = '设置货币数量'
+    valueDialogTitle.value = '设置货币数量'
   } else if (type == 'draw') {
-    dialogTitle.value = '设置抽卡次数'
+    valueDialogTitle.value = '设置抽卡次数'
   }
 
   // 打开模态框
-  dialog.value.open(type)
+  valueDialog.value.open(type)
 }
 
 // 无暇按钮
@@ -251,7 +299,6 @@ const flawlessButton = () => {
   // 判断突袭地图是否为空
   if (checkRaidMap()) return
   // 添加货币
-  const userStore = useUserStore()
   userStore.playerMoney += 6
 
   ElMessage({
@@ -268,31 +315,14 @@ const flawlessButton = () => {
   }, 3000)
 }
 
-// 设置地图信息
-const setMapInfo = () => {
-  const raidStore = useRaidStore()
-  if (raidStore.map != '' && raidStore.map != null) {
-    mapName.value = raidStore.map.name
-    mapSteps.value = raidStore.map.level
-    mapStepNum.value = raidStore.levelPoint
-    mapStepWidth.value = 100 / Number(mapSteps.value)
-    chestSteps.value = raidStore.chest
-    chestStepNum.value = raidStore.chestPoint
-    chestStepWidth.value = 100 / Number(chestSteps.value)
-  }
-}
-
 // 个人事件
 const playerEvent = () => {
-  const eventStore = useEventStore()
 
-  const eventNumbers = ref([1, 2, 3, 4])
-  eventNumbers.value = shuffle(eventNumbers.value)
-
-  // console.log(eventNumbers.value)
   // console.log('----个人事件-----')
 
-  if (eventNumbers.value[0] != 1) {
+  const size = randomNum(1, 3)
+
+  for (let i = 0; i < size; i++) {
     const event = lotteryByCount(eventStore.playerEventList)
     for (let i = 0; i < eventStore.playerEventList.length; i++) {
       if (event.id == eventStore.playerEventList[i].id) {
@@ -301,28 +331,24 @@ const playerEvent = () => {
       }
     }
 
-    const userStore = useUserStore()
     userStore.playerEventList.push(event)
-
-    ElMessage({
-      message: '你有新的个人事件',
-      grouping: true,
-      type: 'warning'
-    })
   }
+
+
+  ElMessage({
+    message: `你有新的个人事件`,
+    grouping: true,
+    type: 'warning'
+  })
 }
 
 // 全局事件
 const globalEvent = () => {
-  const eventStore = useEventStore()
-
-  const globalEventNumbers = ref([1, 2, 3, 4])
-  globalEventNumbers.value = shuffle(globalEventNumbers.value)
-
   // console.log('----全局事件-----')
-  // console.log(globalEventNumbers.value)
 
-  if (globalEventNumbers.value[0] != 1) {
+  const size = randomNum(1, 2)
+
+  for (let i = 0; i < size; i++) {
     const globalEvent = lotteryByCount(eventStore.globalEventList)
     for (let i = 0; i < eventStore.globalEventList.length; i++) {
       if (globalEvent.id == eventStore.globalEventList[i].id) {
@@ -331,21 +357,19 @@ const globalEvent = () => {
       }
     }
 
-    const userStore = useUserStore()
     userStore.globalEventList.push(globalEvent)
-
-    ElMessage({
-      message: '队伍有新的全局事件',
-      grouping: true,
-      type: 'warning'
-    })
   }
+
+
+  ElMessage({
+    message: '队伍有新的全局事件',
+    grouping: true,
+    type: 'warning'
+  })
 }
 
 // 初始化
 const initOptions = async () => {
-  const raidStore = useRaidStore()
-  maps.value = raidStore.maps
   setMapInfo()
 }
 initOptions()
@@ -354,7 +378,7 @@ initOptions()
   <div id="options">
     <div class="map-pane">
       <div class="map-info">
-        <div class="map-img">
+        <div class="map-img" @click="mapDialogVisible = true">
           <img :src="getRaidMapImg(mapName)" alt="地图" />
         </div>
         <p class="map-text">- {{ mapName }} -</p>
@@ -362,7 +386,7 @@ initOptions()
       </div>
 
       <div class="map-level-box">
-        <p>遭遇战通关进度</p>
+        <p>-遭遇战通关进度-</p>
         <div class="map-step-bar">
           <div class="map-bar" :style="{ width: (mapStepNum - 1) * mapStepWidth + '%' }"></div>
           <div class="step map-step" v-for="index in mapSteps + 1" :key="index"
@@ -381,7 +405,7 @@ initOptions()
       </div>
 
       <div class="map-chest-box">
-        <p>隐藏箱进度</p>
+        <p>-隐藏箱进度-</p>
         <div class="chest-step-bar">
           <div class="chest-bar" :style="{ width: (chestStepNum - 1) * chestStepWidth + '%' }"></div>
           <div class="step map-step" v-for="index in chestSteps + 1" :key="index"
@@ -412,23 +436,92 @@ initOptions()
     <!-- 地图选择模态框 -->
     <el-dialog class="dialog map-dialog" v-model="mapDialogVisible" :close-on-click-modal="false" width="75rem"
       align-center>
+
+      <div class="map-title">
+        <h1>选择游戏地图</h1>
+      </div>
+
       <div class="map-list-box">
         <div class="map-item" v-for="(map, index) in maps" :key="index" @click="setMap(map)">
           <img :src="getRaidMapImg(map.name)" :alt="map.name" />
           <p>{{ map.name }}</p>
         </div>
       </div>
+
       <div class="map-confirm-box">
         <button type="button" class="button map-cancel" @click="mapDialogVisible = false">
-          取消
+          关闭
         </button>
       </div>
     </el-dialog>
 
-    <ChangeValue ref="dialog" v-model:show-dialog="dialogVisible" :title="dialogTitle" :type="dialogType"></ChangeValue>
+    <ChangeValue ref="valueDialog" :title="valueDialogTitle"></ChangeValue>
+
+    <!-- 游戏挑战信息版 -->
+    <InfoBoard type="left" :show-info-board="infoBoard.gameChallenge">
+      <template #close-button>
+        <div class="close-button">
+          <a @click="infoBoard.gameChallenge = !infoBoard.gameChallenge">{{ infoBoard.gameChallenge ? "关闭" : "查看游戏挑战"
+            }}</a>
+        </div>
+      </template>
+      <template #title>
+        <h1 class="title">
+          游戏挑战
+        </h1>
+      </template>
+      <template #content>
+        <div>
+          <div v-for="item in gameChallengeData" :key="item.mapName">
+            <p class="title">{{ item.mapName }} - {{ item.level }} - {{ item.name }}</p>
+            <p class="description">{{ item.description }}</p>
+            <hr>
+          </div>
+        </div>
+      </template>
+    </InfoBoard>
+
+    <!-- 游戏规则信息版 -->
+    <InfoBoard type="right" :show-info-board="infoBoard.gamePlay">
+      <template #close-button>
+        <div class="close-button">
+          <a @click="infoBoard.gamePlay = !infoBoard.gamePlay">{{ infoBoard.gamePlay ? "关闭" : "查看游戏规则" }}</a>
+        </div>
+      </template>
+      <template #title>
+        <h1 class="title">
+          游戏规则
+        </h1>
+      </template>
+      <template #content>
+        <div>
+          <p>职业自选 / 分支自选</p>
+          <p>玩家每人领取一个号码作为自己标识： 1 2 3 4 5 6</p>
+          <p>起始人物限定一身紫色品质护甲，属性不限，无模组（属性模组除外） 无星象碎片</p>
+          <p>无法使用 ：1超能 2手雷 3充能近战 （*职业技能可用）</p>
+          <p>武器为任意蓝色品质的装备，不限使用，可以随意更换</p>
+          <p>赛季神器可以点亮第一排眩晕勇士的模组</p>
+          <p>raid本中掉落的武器或护甲可以直接使用，掉落的武器与护甲，不能进行大师升级，但是可以插入模组（掉落的装备为 Raid 装备，可以插 Raid 模组）</p>
+          <p>武器可以增加任意模组，护甲可以增加属性模组</p>
+          <hr>
+          <p>在每次遭遇战（不包含开门关）开始之前</p>
+          <p>所有玩家均可在卡池中抽取两张卡牌</p>
+          <p>商店免费刷新次数+1</p>
+          <p>每开启一个宝箱（含隐藏箱）获得 1-3 个货币，若无暇通过遭遇战额外奖励6单位货币</p>
+          <p>无暇的判断条件为：插旗之后通关本次遭遇战无人死亡即可，若出现bug/掉线/没摸子弹等其他情况团灭不计在内，不可以主动进行团灭</p>
+          <p>且遭遇战正在进行时，落地死亡的人不能获得无暇奖励</p>
+          <hr>
+          <p>减益卡牌说明</p>
+          <p>每携带一张微弱不适卡牌，每过一关遭遇战则获得 1 货币</p>
+          <p>每携带一张重度不适卡牌，每过一关遭遇战则获得 2 货币</p>
+          <p>每携带一张反人类卡牌，每过一关遭遇战则获得 3 货币</p>
+        </div>
+      </template>
+    </InfoBoard>
+
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '@/assets/styles/options';
 </style>
