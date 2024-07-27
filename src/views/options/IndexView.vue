@@ -7,7 +7,6 @@ import {
   getRaidMapImg,
   lottery,
   lotteryByCount,
-  shuffle,
   checkRaidMap,
   randomNum,
 } from '@/utils'

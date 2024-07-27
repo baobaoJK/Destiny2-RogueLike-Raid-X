@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { ElMessage } from 'element-plus'
 import { useDungenoStore, useUserStore } from '@/stores'
-import { shuffle, lottery, checkDeck, getDeckListType, deckType, getDeckListTagLevelList } from '@/utils'
+import { shuffle, lottery, getDeckListTagLevelList } from '@/utils'
 import InfoBoard from "@/components/infoboard/IndexView.vue"
 
 // 用户信息
