@@ -19,11 +19,14 @@ const finishBounty = () => {
   const nullBounty = {
     id: 'V0',
     type: 'Value',
+    tag: '',
     name: '',
     valueName: '当前没有赏金任务',
     description: '请过段时间再来',
+    stage: 'none',
     weight: 0,
-    count: 1
+    count: 1,
+    idea: "D2RRX"
   }
 
   // 清空赏金任务列表

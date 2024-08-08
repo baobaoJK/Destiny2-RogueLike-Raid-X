@@ -9,6 +9,8 @@ import {
   lotteryByCount,
   checkRaidMap,
   randomNum,
+  getRandomCard,
+  saveCard,
 } from '@/utils'
 import ChangeValue from './components/ChangeValue.vue'
 import InfoBoard from "@/components/infoboard/IndexView.vue"
@@ -239,6 +241,42 @@ const mapNext = () => {
 
         userStore.playerMoney += debuffTestCount.value
       }
+    }
+
+    // 判断是否有重重难关
+    if (userStore.difficult) {
+      const count = mapStepNum.value - 2
+
+      for (let i = 0; i < count; i++) {
+        const num = randomNum(3, 5)
+        const card = getRandomCard(num, false)
+        saveCard(card)
+      }
+
+      ElMessage({
+        message: `因你携带重重难关，已通过第 ${count} 关，已经随机生成 ${count} 张不适卡牌`,
+        grouping: true,
+        duration: 0,
+        showClose: true
+      })
+    }
+
+    // 判断是否有这不是很简单吗
+    if (userStore.easy) {
+      const count = mapStepNum.value - 2
+
+      for (let i = 0; i < count; i++) {
+        const num = randomNum(0, 2)
+        const card = getRandomCard(num, false)
+        saveCard(card)
+      }
+
+      ElMessage({
+        message: `因你携带这不是很简单吗，已通过第 ${count} 关，已经随机生成 ${count} 张增益卡牌`,
+        grouping: true,
+        duration: 0,
+        showClose: true
+      })
     }
 
     // 更改按钮状态

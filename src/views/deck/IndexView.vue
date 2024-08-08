@@ -24,7 +24,8 @@ const {
   deckClosed,
   gambler,
   stargazing,
-  thirteen
+  thirteen,
+  giveUp
 } = storeToRefs(useUserStore())
 
 // 卡牌数量
@@ -246,6 +247,15 @@ const initDeck = () => {
       duration: 0
     })
   }
+
+  if (userStore.giveUp) {
+    ElMessage({
+      message: '你身上有开摆事件，暂不为你开放抽卡',
+      grouping: true,
+      duration: 0,
+      showClose: true
+    })
+  }
 }
 initDeck()
 </script>
@@ -256,24 +266,24 @@ initDeck()
 
     <!-- 卡牌抽奖框 -->
     <div class="deck-list">
-      <div class="deck" v-show="!gambler">
-        <div class="deck-1" id="safe" @click="showDeck('safe')"></div>
+      <div class="deck card-item-1" v-show="!gambler">
+        <div class="deck-1 card" id="safe" @click="showDeck('safe')"></div>
         <p class="deck-name">- 稳妥起见 -</p>
       </div>
-      <div class="deck" v-show="!gambler">
-        <div class="deck-2" id="danger" @click="showDeck('danger')"></div>
+      <div class="deck card-item-2" v-show="!gambler">
+        <div class="deck-2 card" id="danger" @click="showDeck('danger')"></div>
         <p class="deck-name">- 险中求胜 -</p>
       </div>
-      <div class="deck">
-        <div class="deck-3" id="gambit" @click="showDeck('gambit')"></div>
+      <div class="deck card-item-3">
+        <div class="deck-3 card" id="gambit" @click="showDeck('gambit')"></div>
         <p class="deck-name">- 对赌博弈 -</p>
       </div>
-      <div class="deck" v-show="!gambler">
-        <div class="deck-4" id="luck" @click="showDeck('luck')"></div>
+      <div class="deck card-item-4" v-show="!gambler">
+        <div class="deck-4 card" id="luck" @click="showDeck('luck')"></div>
         <p class="deck-name">- 时来运转 -</p>
       </div>
-      <div class="deck" v-show="!gambler">
-        <div class="deck-5" id="devote" @click="showDeck('devote')"></div>
+      <div class="deck card-item-5" v-show="!gambler">
+        <div class="deck-5 card" id="devote" @click="showDeck('devote')"></div>
         <p class="deck-name">- 身心奉献 -</p>
       </div>
     </div>
@@ -300,10 +310,10 @@ initDeck()
       <div class="deck-list-info">
         <h1>卡池信息</h1>
         <p class="deck-type-info safe">
-          卡池1 - 稳妥起见 - (7张微弱增益 1张强大增益 4张微弱不适)
+          卡池1 - 稳妥起见 - (6张微弱增益 1张强大增益 4张微弱不适 1张特殊卡牌)
         </p>
         <p class="deck-type-info danger">
-          卡池2 - 险中求胜 - (5张微弱增益 2张强大增益 1张欧皇增益 1张微弱不适 3张重度不适)
+          卡池2 - 险中求胜 - (4张微弱增益 2张强大增益 1张欧皇增益 2张微弱不适 2张重度不适 1张特殊卡牌)
         </p>
         <p class="deck-type-info gambit">
           卡池3 - 对赌博弈 - (5张强大增益 1张欧皇增益 5张重度不适 1张反人类)
@@ -312,9 +322,9 @@ initDeck()
           卡池4 - 时来运转 - (1张强大增益 1张欧皇增益 1张重度不适 1张反人类 8张特殊卡牌)
         </p>
         <p class="deck-type-info devote">
-          卡池5 - 身心奉献 - (6张辅助卡牌 6张重度不适)</p>
+          卡池5 - 身心奉献 - (8张辅助卡牌 4张微弱不适) (辅助卡牌数量不够则会换成特殊卡牌)</p>
         <p class="deck-type-info">
-          ------------------------------------------------------------------------------------------
+          --------------------------------------------------------------------------------------------------------
         </p>
         <p class="deck-type-info">
           如果想当平民安逸的度过则可以抽取 稳妥起见，如果想体验刺激的则可以抽取 险中求胜
@@ -369,15 +379,15 @@ initDeck()
           </span>
         </p>
       </div>
-      <div class="deck-list-box" :class="{
-        'deck-1': deckDialogConfig.deckListStyle[0],
-        'deck-2': deckDialogConfig.deckListStyle[1],
-        'deck-3': deckDialogConfig.deckListStyle[2],
-        'deck-4': deckDialogConfig.deckListStyle[3],
-        'deck-5': deckDialogConfig.deckListStyle[4]
-      }">
-        <div class="card-item" v-for="(card, index) in deck" :key="index" @click="clickCard(card, index)"
-          :class="{ flip: deckDialogConfig.flips[index] }">
+      <div class="deck-list-box">
+        <div class="card-item" :class="{
+          flip: deckDialogConfig.flips[index],
+          'card-item-1': deckDialogConfig.deckListStyle[0],
+          'card-item-2': deckDialogConfig.deckListStyle[1],
+          'card-item-3': deckDialogConfig.deckListStyle[2],
+          'card-item-4': deckDialogConfig.deckListStyle[3],
+          'card-item-5': deckDialogConfig.deckListStyle[4]
+        }" v-for="(card, index) in deck" :key="index" @click="clickCard(card, index)">
           <div class="card card-front">
             <div class="card-info">
               <p class="card-id">{{ card.name }}</p>
@@ -393,7 +403,7 @@ initDeck()
     </el-dialog>
 
     <!-- 卡池关闭 -->
-    <div class="deck-closed" v-if="deckClosed || thirteen"></div>
+    <div class="deck-closed" v-if="deckClosed || thirteen || giveUp"></div>
 
     <!-- 卡池信息版 -->
     <InfoBoard type="right" :show-info-board="infoBoard.gameDeck">

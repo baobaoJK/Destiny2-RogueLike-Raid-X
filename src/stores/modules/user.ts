@@ -95,6 +95,29 @@ export const useUserStore = defineStore(
       const card = deckList.value.Technology.find((card: any) => card.name === 'Thirteen-Orphans')
       return card !== undefined ? true : false
     })
+    // 免死金牌与帝王禁令
+    const counteract = computed(() => {
+      const card1 = deckList.value.Opportunity.find((card: any) => card.name === 'The-Medallion')
+      const card2 = deckList.value.Unacceptable.find((card: any) => card.name === 'Imperial-Ban')
+      return card1 !== undefined && card2 !== undefined
+    })
+    // 开摆
+    const giveUp = computed(() => {
+      const playerevent = playerEventList.value.find((event: any) => event.name === 'Open1')
+      return playerevent !== undefined ? true : false
+    })
+    // 重重难关
+    const difficult = computed(() => {
+      const card = deckList.value.Unacceptable.find(
+        (card: any) => card.name === 'Many-Difficulties'
+      )
+      return card !== undefined ? true : false
+    })
+    // 这不是很简单吗
+    const easy = computed(() => {
+      const card = deckList.value.Opportunity.find((card: any) => card.name === 'Easy')
+      return card !== undefined ? true : false
+    })
     // 窃取
     const steal = ref(false)
     // 玩家背包
@@ -142,59 +165,40 @@ export const useUserStore = defineStore(
         {
           id: 'V0',
           type: 'Value',
+          tag: '',
           name: '',
           valueName: '当前没有赏金任务',
           description: '请过段时间再来',
+          stage: 'none',
           weight: 0,
-          count: 1
+          count: 1,
+          idea: 'D2RRX'
         },
         {
           id: 'V0',
           type: 'Value',
+          tag: '',
           name: '',
           valueName: '当前没有赏金任务',
           description: '请过段时间再来',
+          stage: 'none',
           weight: 0,
-          count: 1
+          count: 1,
+          idea: 'D2RRX'
         },
         {
           id: 'V0',
           type: 'Value',
+          tag: '',
           name: '',
           valueName: '当前没有赏金任务',
           description: '请过段时间再来',
+          stage: 'none',
           weight: 0,
-          count: 1
+          count: 1,
+          idea: 'D2RRX'
         }
       ]
-    }
-
-    // 获取用户信息
-    const getUserInfo = () => {
-      return {
-        role,
-        roleId,
-        username,
-        isCaptain,
-        playerMoney,
-        drawCount,
-        refreshCount,
-        refreshMoney,
-        devilspact,
-        market,
-        profiteer,
-        shopClosed,
-        gambler,
-        compensate,
-        deckClosed,
-        backpack,
-        backpackImg,
-        deckList,
-        bountyList,
-        playerEventList,
-        globalEventList,
-        infoBoard
-      }
     }
 
     // 重置
@@ -250,6 +254,10 @@ export const useUserStore = defineStore(
       noDeal,
       noBuddy,
       thirteen,
+      counteract,
+      giveUp,
+      difficult,
+      easy,
       steal,
       deckClosed,
       backpack,
@@ -259,7 +267,6 @@ export const useUserStore = defineStore(
       playerEventList,
       globalEventList,
       infoBoard,
-      getUserInfo,
       setUserInfo,
       reset
     }

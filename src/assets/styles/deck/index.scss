@@ -32,7 +32,6 @@
           width: 16.25rem;
           height: 27.5rem;
           margin-bottom: 1rem;
-          background-image: url('/images/deck/deck-' + #{$i} + ".jpg");
           background-size: cover;
           border-radius: 2rem;
           transition: all 0.5s;
@@ -42,27 +41,6 @@
             transform: scale(1.05);
             opacity: 0.8;
           }
-
-          @if ($i==1) {
-            box-shadow: 0 0 1rem 0.25rem #546072;
-          }
-
-          @if ($i==2) {
-            box-shadow: 0 0 1rem 0.25rem #7fe4c5;
-          }
-
-          @if ($i==3) {
-            box-shadow: 0 0 1rem 0.25rem #d2c796;
-          }
-
-          @if ($i==4) {
-            box-shadow: 0 0 1rem 0.25rem #973b3a;
-          }
-
-          @if ($i==5) {
-            box-shadow: 0 0 1rem 0.25rem #6e43cb;
-          }
-
         }
       }
 
@@ -123,39 +101,6 @@
       display: flex;
       flex-wrap: wrap;
       margin: 2rem 0;
-
-      @for $i from 1 through 5 {
-        &.deck-#{$i} {
-          .card {
-            border-radius: 1rem;
-
-            @if ($i==1) {
-              background-image: url('/images/deck/deck-1.jpg');
-              box-shadow: 0 0 1rem 0.25rem #546072;
-            }
-
-            @if ($i==2) {
-              background-image: url('/images/deck/deck-2.jpg');
-              box-shadow: 0 0 1rem 0.25rem #7fe4c5;
-            }
-
-            @if ($i==3) {
-              background-image: url('/images/deck/deck-3.jpg');
-              box-shadow: 0 0 1rem 0.25rem #d2c796;
-            }
-
-            @if ($i==4) {
-              background-image: url('/images/deck/deck-4.jpg');
-              box-shadow: 0 0 1rem 0.25rem #973b3a;
-            }
-
-            @if ($i==5) {
-              background-image: url('/images/deck/deck-5.jpg');
-              box-shadow: 0 0 1rem 0.25rem #6e43cb;
-            }
-          }
-        }
-      }
 
       .card-item {
         display: flex;

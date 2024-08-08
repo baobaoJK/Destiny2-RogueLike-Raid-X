@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useUserStore } from '@/stores';
-import { deckType, deleteCard, getCardTypeName, saveCard } from '@/utils';
+import { deckType, deleteCard, getCardTypeName, saveCardByName } from '@/utils';
 import { ref, watch } from 'vue'
 
 // 属性
@@ -38,9 +38,11 @@ const getPlayerDeckList = () => {
 }
 // 导入卡牌
 const importCard = () => {
+    console.log(value.value)
+
     if (value.value.length !== 0) {
         value.value.forEach((card: any) => {
-            saveCard(card)
+            saveCardByName(card)
         })
     }
 
@@ -86,7 +88,19 @@ const exportCard = () => {
         deleteCard(value.value[i])
     }
     // JSON 转换字符串
-    exportValue.value = JSON.stringify(value.value)
+
+    const cardList = [];
+
+    for (let i = 0; i < value.value.length; i++) {
+        let card = {
+            type: value.value[i].type,
+            name: value.value[i].name,
+            cardName: value.value[i].cardName
+        }
+        cardList.push(card)
+    }
+
+    exportValue.value = JSON.stringify(cardList)
 
     data.value = getPlayerDeckList()
 }
@@ -137,8 +151,8 @@ watch(importValue, () => {
         </div>
         <div class="card-options-box">
             <el-transfer v-model="value" :data="data" :titles="optionsTitles" :button-texts="['移除', '添加']" />
-            <el-input v-if="dialogType === 'export'" v-model="exportValue" placeholder="导出卡牌信息"></el-input>
-            <el-input v-else v-model="importValue" placeholder="导入卡牌信息"></el-input>
+            <el-input v-if="dialogType === 'export'" v-model="exportValue" placeholder="导出卡牌信息" size="large"></el-input>
+            <el-input v-else v-model="importValue" placeholder="导入卡牌信息" size="large"></el-input>
         </div>
         <div class="buttons">
 

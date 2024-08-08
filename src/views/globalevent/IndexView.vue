@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { ElMessage } from 'element-plus'
 import { useDungenoStore, useUserStore } from '@/stores'
-import { shuffle, lottery, getDeckListTagLevelList } from '@/utils'
+import { shuffle, lottery, getDeckListTagLevelList, getRandomCard, randomNum } from '@/utils'
 import InfoBoard from "@/components/infoboard/IndexView.vue"
 
 // 用户信息
@@ -67,7 +67,13 @@ const runEvent = (eventName: any) => {
     deckDialogVisible.value = true
     deckTitle.value = '五谷丰登'
 
-    const deckList = getDeckListTagLevelList('MicroGain', [2, 2, 2])
+    const deckList = []
+
+    for (let i = 0; i < 6; i++) {
+      const randomType = randomNum(0, 7);
+      const card = getRandomCard(randomType, false)
+      deckList.push(card)
+    }
 
     selfDeckList.value = deckList
     str =
@@ -169,6 +175,9 @@ initGlobalEvent()
                 <p v-if="globalEvent.idea !== 'D2RRX'">想法来源：{{ globalEvent.idea }}</p>
               </div>
               <div class="buttons">
+                <!-- <button class="button confirm" @click="acceptEvent(globalEvent, index)">
+                  接受
+                </button> -->
                 <button class="button confirm" v-if="globalEvent.stage === 'none'"
                   @click="acceptEvent(globalEvent, index)">
                   接受
@@ -192,7 +201,14 @@ initGlobalEvent()
         <h1 class="deck-title">{{ deckTitle }}</h1>
       </div>
       <div class="deck-list-box">
-        <div class="card-item" v-for="(card, index) in selfDeckList" :key="index" :class="{ flip: cardFlip[index] }">
+        <div class="card-item" v-for="(card, index) in selfDeckList" :key="index" :class="{
+          flip: cardFlip[index],
+          'card-item-1': card.type === 'MicroGain' || card.type === 'StrongGain',
+          'card-item-2': card.type === 'MicroDiscomfort' || card.type === 'StrongDiscomfort',
+          'card-item-3': card.type === 'Opportunity' || card.type === 'Unacceptable',
+          'card-item-4': card.type === 'Technology',
+          'card-item-5': card.type === 'Support'
+        }">
           <div class="card card-front">
             <div class="card-info">
               <p class="card-id">{{ card.cardName }}</p>

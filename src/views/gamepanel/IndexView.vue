@@ -4,7 +4,7 @@ import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { lightImg, cardImg } from '@/utils';
 
-const userInfo = ref()
+const userStore = useUserStore()
 const route: any = ref('')
 const routePath = [
   '/map',
@@ -38,35 +38,32 @@ const initGamePanel = () => {
     }
   }
 
-  const userStore = useUserStore()
-  userInfo.value = userStore.getUserInfo()
-
   // 设置名片
-  if (userInfo.value.username === '和泉纱雾') {
+  if (userStore.username === '和泉纱雾') {
     emblemSpecial.value = new URL('/images/emblem/es-w.jpg', import.meta.url).href
     emblemIcon.value = new URL('/images/emblem/es_icon.png', import.meta.url).href
   }
   // 年糕明名片
-  else if (userInfo.value.username === '年糕明') {
+  else if (userStore.username === '年糕明') {
     emblemSpecial.value = new URL('/images/emblem/up/ngm/special.jpg', import.meta.url).href
     emblemIcon.value = new URL('/images/emblem/up/ngm/overlay.png', import.meta.url).href
   }
   // 铸币梅eve
-  else if (userInfo.value.username === '铸币梅eve') {
+  else if (userStore.username === '铸币梅eve') {
     emblemSpecial.value = new URL('/images/emblem/up/zbmeve/special.png', import.meta.url).href
     emblemIcon.value = new URL('/images/emblem/up/zbmeve/overlay.png', import.meta.url).href
 
   }
-  else if (userInfo.value.isCaptain) {
+  else if (userStore.isCaptain) {
     emblemSpecial.value = new URL('/images/emblem/captain-w.jpg', import.meta.url).href
     emblemIcon.value = new URL('/images/emblem/captain_icon.png', import.meta.url).href
   } else {
     emblemSpecial.value = new URL(
-      '/images/emblem/' + userInfo.value.role + '-w.jpg',
+      '/images/emblem/' + userStore.role + '-w.jpg',
       import.meta.url
     ).href
     emblemIcon.value = new URL(
-      '/images/emblem/' + userInfo.value.role + '_icon.png',
+      '/images/emblem/' + userStore.role + '_icon.png',
       import.meta.url
     ).href
   }
@@ -83,20 +80,20 @@ initGamePanel()
         <div class="icon" :style="{ 'background-image': `url(${emblemIcon})` }"></div>
         <div class="info">
           <router-link class="emblem" to="home">
-            <p class="name">{{ userInfo.username }}</p>
+            <p class="name">{{ userStore.username }}</p>
             <div class="sub">
-              <p class="number">{{ userInfo.roleId }} 号玩家</p>
+              <p class="number">{{ userStore.roleId }} 号玩家</p>
               <p class="line">/</p>
               <p class="light">2000</p>
               <p class="line">/</p>
               <p class="money">
                 <img class="light" :src="lightImg" alt="light.png" />
-                光尘货币：{{ userInfo.playerMoney }}
+                光尘货币：{{ userStore.playerMoney }}
               </p>
               <p class="line">/</p>
               <p class="draw-count">
                 <img class="draw" :src="cardImg" alt="card.png" />
-                抽卡次数：{{ userInfo.drawCount }}
+                抽卡次数：{{ userStore.drawCount }}
               </p>
             </div>
           </router-link>
@@ -105,7 +102,7 @@ initGamePanel()
 
       <div class="menu">
         <ul>
-          <li v-if="userInfo.isCaptain" class="menu-link" key="1" :class="{ active: activeIndex === 1 }"
+          <li v-if="userStore.isCaptain" class="menu-link" key="1" :class="{ active: activeIndex === 1 }"
             @click="setActive(1)">
             <router-link to="map" target="windows">地图</router-link>
           </li>
@@ -124,7 +121,7 @@ initGamePanel()
           <li class="menu-link" key="6" :class="{ active: activeIndex === 6 }" @click="setActive(6)">
             <router-link to="playerevent" target="windows">个人事件</router-link>
           </li>
-          <li v-if="userInfo.isCaptain" class="menu-link" key="7" :class="{ active: activeIndex === 7 }"
+          <li v-if="userStore.isCaptain" class="menu-link" key="7" :class="{ active: activeIndex === 7 }"
             @click="setActive(7)">
             <router-link to="globalevent" target="windows">全局事件</router-link>
           </li>

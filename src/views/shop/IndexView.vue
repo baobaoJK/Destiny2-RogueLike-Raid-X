@@ -377,6 +377,16 @@ const initShop = () => {
     })
   }
 
+  // 开摆
+  if (userStore.giveUp) {
+    ElMessage({
+      message: '你身上有开摆事件，暂不为你开放商店',
+      grouping: true,
+      duration: 0,
+      showClose: true
+    })
+  }
+
   // console.log(shopStore.randomItems)
 }
 // 初始化
@@ -469,7 +479,12 @@ initShop()
       align-center>
       <h1 class="title">选择要删除的卡牌</h1>
       <div class="card-list-box">
-        <div class="card-item" v-for="(card, index) in waterDeckList" :key="index" @click="deleteCardItem(card, index)">
+        <div class="card-item" v-for="(card, index) in waterDeckList" :key="index" @click="deleteCardItem(card, index)"
+          :class="{
+            'card-item-2': card.type === 'MicroDiscomfort' || card.type === 'StrongDiscomfort',
+            'card-item-3': card.type === 'Unacceptable',
+            'card-item-4': card.type === 'Technology'
+          }">
           <div class="card">
             <div class="card-info">
               <p class="card-id">{{ card.cardName }}</p>
@@ -486,8 +501,8 @@ initShop()
     </el-dialog>
 
     <!-- 商店关闭模态框 -->
-    <div class="shop-closed" v-if="userStore.shopClosed">
-      <button class="button open-shop" @click="openShop">开启商店</button>
+    <div class="shop-closed" v-if="userStore.shopClosed || userStore.giveUp">
+      <button class="button open-shop" v-if="userStore.shopClosed" @click="openShop">开启商店</button>
     </div>
 
     <!-- 商店信息版 -->

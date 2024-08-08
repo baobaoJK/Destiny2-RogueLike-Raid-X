@@ -14,11 +14,12 @@ import {
   deleteCard,
   saveCard,
   cardImg,
-  randomCard
+  randomCard,
+  findCardByName
 } from '@/utils'
 
 // 用户信息
-const { deckList, infoBoard, torture, program, drawCount, playerMoney } = storeToRefs(useUserStore())
+const { deckList, infoBoard, torture, program, counteract, drawCount, playerMoney } = storeToRefs(useUserStore())
 
 // 卡池信息
 const {
@@ -104,7 +105,7 @@ const allDeckCount = ref()
 // 删除卡牌
 const deleteCardButton = (card: any) => {
   // 苦肉计
-  if (torture.value && (card.type === deckType[0] || card.type === deckType[1])) {
+  if (torture.value && (card.type === deckType[0] || card.type === deckType[1] || card.tyep === deckType[2])) {
     drawCount.value += 2
     ElMessage({
       message: '已触发苦肉计，获取 2 次抽卡机会',
@@ -227,7 +228,8 @@ const initDeckList = () => {
     ElMessage({
       message: `苦肉计已生效，你可以选择失去一张增益卡牌换取两次抽卡机会`,
       duration: 0,
-      showClose: true
+      showClose: true,
+      grouping: true
     })
   }
 
@@ -236,8 +238,24 @@ const initDeckList = () => {
     ElMessage({
       message: `卡牌回收计划已生效，你可以售卖你多余的增益卡牌，微弱增益 1 个货币，强大增益 3 个货币，欧皇增益 6 个货币`,
       duration: 0,
-      showClose: true
+      showClose: true,
+      grouping: true
     })
+  }
+
+  // 卡牌抵消
+  if (counteract.value) {
+    ElMessage({
+      message: `你已拥有 免死金牌 和 帝王禁令，这两张牌互相抵消，已被移除卡牌列表`,
+      duration: 0,
+      showClose: true,
+      grouping: true
+    })
+
+    const card1 = findCardByName('The-Medallion', 'user')
+    const card2 = findCardByName('Imperial-Ban', 'user')
+    deleteCard(card1)
+    deleteCard(card2)
   }
 }
 
@@ -306,7 +324,13 @@ initDeckList()
           <hr class="deck-line" />
         </div>
 
-        <div class="card-item" v-for="card in deck" :key="card.id">
+        <div class="card-item" v-for="card in deck" :key="card.id" :class="{
+          'card-item-1': card.type === 'MicroGain' || card.type === 'StrongGain',
+          'card-item-2': card.type === 'MicroDiscomfort' || card.type === 'StrongDiscomfort',
+          'card-item-3': card.type === 'Opportunity' || card.type === 'Unacceptable',
+          'card-item-4': card.type === 'Technology',
+          'card-item-5': card.type === 'Support'
+        }">
           <div class="card" v-if="deck.length != 0">
             <div class="card-info">
               <div>
@@ -339,7 +363,13 @@ initDeckList()
             <el-scrollbar height="25rem" native
               view-style="display: flex; flex-wrap: wrap; justify-content: center; width: 65rem; overfloy-x: hidden;">
               <div class="item card-item" v-for="(card, index2) in deckList.value" :key="index2"
-                @mousemove="showTooltip(card, index)" @mouseout="hideTooltip()">
+                @mousemove="showTooltip(card, index)" @mouseout="hideTooltip()" :class="{
+                  'card-item-1': card.type === 'MicroGain' || card.type === 'StrongGain',
+                  'card-item-2': card.type === 'MicroDiscomfort' || card.type === 'StrongDiscomfort',
+                  'card-item-3': card.type === 'Opportunity' || card.type === 'Unacceptable',
+                  'card-item-4': card.type === 'Technology',
+                  'card-item-5': card.type === 'Support'
+                }">
                 <div class="card" @click="addCard(card)">
                   <div class="info card-info">
                     <div>
@@ -368,7 +398,13 @@ initDeckList()
       width="75.25rem" align-center>
       <h1 class="title">打乱顺序</h1>
       <div class="box shuffle-list-box">
-        <div class="item shuffle-item" v-for="(card, index) in allDeck" :key="index">
+        <div class="item shuffle-item" v-for="(card, index) in allDeck" :key="index" :class="{
+          'card-item-1': card.type === 'MicroGain' || card.type === 'StrongGain',
+          'card-item-2': card.type === 'MicroDiscomfort' || card.type === 'StrongDiscomfort',
+          'card-item-3': card.type === 'Opportunity' || card.type === 'Unacceptable',
+          'card-item-4': card.type === 'Technology',
+          'card-item-5': card.type === 'Support'
+        }">
           <div class="card">
             <div class="info shuffle-info">
               <p class="card-id">{{ card.name }}</p>
@@ -388,14 +424,78 @@ initDeckList()
       align-center>
       <h1 class="title">随机抽取卡牌</h1>
       <div class="box random-list-box">
-        <div class="item random-item" v-for="(type, index) in cardTypeListName" :key="index">
-          <div class="card" @click="randomCard(1, index, false)">
-            <div class="info random-info">
-              <p>抽取一张</p>
-              <p class="card-id">{{ type }}</p>
+        <div class="random-flex random-left">
+
+          <div class="item random-item card-item-4">
+            <div class="card" @click="randomCard(1, 6, false)">
+              <div class="info random-info">
+                <p>抽取一张</p>
+                <p class="card-id">{{ cardTypeListName[6] }}</p>
+              </div>
             </div>
           </div>
         </div>
+        <div class="random-flex random-center">
+          <div class="item random-item card-item-1">
+            <div class="card" @click="randomCard(1, 0, false)">
+              <div class="info random-info">
+                <p>抽取一张</p>
+                <p class="card-id">{{ cardTypeListName[0] }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="item random-item card-item-3">
+            <div class="card" @click="randomCard(1, 2, false)">
+              <div class="info random-info">
+                <p>抽取一张</p>
+                <p class="card-id">{{ cardTypeListName[2] }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="item random-item card-item-2">
+            <div class="card" @click="randomCard(1, 1, false)">
+              <div class="info random-info">
+                <p>抽取一张</p>
+                <p class="card-id">{{ cardTypeListName[1] }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="item random-item card-item-1">
+            <div class="card" @click="randomCard(1, 3, false)">
+              <div class="info random-info">
+                <p>抽取一张</p>
+                <p class="card-id">{{ cardTypeListName[3] }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="item random-item card-item-3">
+            <div class="card" @click="randomCard(1, 5, false)">
+              <div class="info random-info">
+                <p>抽取一张</p>
+                <p class="card-id">{{ cardTypeListName[5] }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="item random-item card-item-2">
+            <div class="card" @click="randomCard(1, 4, false)">
+              <div class="info random-info">
+                <p>抽取一张</p>
+                <p class="card-id">{{ cardTypeListName[4] }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="random-flex random-right">
+          <div class="item random-item card-item-5">
+            <div class="card" @click="randomCard(1, 7, false)">
+              <div class="info random-info">
+                <p>抽取一张</p>
+                <p class="card-id">{{ cardTypeListName[7] }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
       <button type="button" class="button random-cancel" @click="randomDialogVisible = false">
         取消

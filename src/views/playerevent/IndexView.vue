@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores'
-import { randomNum, getDangerDeck, saveCard, youCant } from '@/utils'
+import { randomNum, getTechnology, saveCard, youCant } from '@/utils'
 import { storeToRefs } from 'pinia';
 import InfoBoard from "@/components/infoboard/IndexView.vue"
 import { drink, luckNumber, spy, winOrLoss } from './composables/specialEvent';
@@ -26,12 +26,10 @@ const acceptEvent = (playerEvent: any, index: number) => {
 // 完成事件
 const finishEvent = (playerEvent: any, index: number) => {
   let str = `已完成 ${playerEvent.eventName} 事件`
-  const randomMoney = randomNum(0, 1)
+  const randomMoney = randomNum(1, 3)
 
-  if (randomMoney != 0) {
-    userStore.playerMoney += randomMoney
-    str = `已完成 ${playerEvent.eventName}  事件，获得 ${randomMoney} 货币`
-  }
+  userStore.playerMoney += randomMoney
+  str = `已完成 ${playerEvent.eventName}  事件，获得 ${randomMoney} 货币`
 
   ElMessage({
     message: str,
@@ -67,16 +65,27 @@ const finishEvent = (playerEvent: any, index: number) => {
   if (playerEvent.name === 'Drinking-Poison-to-Quench-Thirst') {
     drink()
   }
+
+  // 开摆
+  if (playerEvent.name === 'Open1') {
+    userStore.playerMoney += 6
+    userStore.drawCount += 2
+    ElMessage({
+      message: '已完成开摆事件，已获得 2 次抽卡机会，6 个货币',
+      grouping: true,
+      type: 'success'
+    })
+  }
 }
 
 // 放弃事件
 const dropEvent = (playerEvent: any, index: number) => {
   punishCount.value += 1
-  dangerDeckList.value = getDangerDeck()
+  dangerDeckList.value = getTechnology(12)
   deckDialogVisible.value = true
 
   ElMessage({
-    message: `已放弃 ${playerEvent.eventName} 事件，需要抽取一次险中求胜卡池`,
+    message: `已放弃 ${playerEvent.eventName} 事件，需要抽取一次特殊卡牌`,
     grouping: true,
     type: 'error'
   })
@@ -302,12 +311,14 @@ initPlayerEvent()
     <el-dialog class="dialog deck-dialog" v-model="deckDialogVisible" :close-on-click-modal="false" width="79.25rem"
       align-center>
       <div class="deck-list-info">
-        <h1 class="deck-list-title">放弃事件惩罚：抽取1次险中求胜卡池</h1>
+        <h1 class="deck-list-title">放弃事件惩罚：抽取1次特殊卡牌</h1>
       </div>
 
       <div class="deck-list-box">
-        <div class="card-item" v-for="(card, index) in dangerDeckList" :key="index" :class="{ flip: cardFlip[index] }"
-          @click="addCard(card, index)">
+        <div class="card-item" v-for="(card, index) in dangerDeckList" :key="index" :class="{
+          flip: cardFlip[index],
+          'card-item-4': card.type === 'Technology',
+        }" @click="addCard(card, index)">
           <div class="card card-front">
             <div class="card-info">
               <p class="card-id">{{ card.cardName }}</p>
@@ -341,8 +352,8 @@ initPlayerEvent()
           <p>玩家每次抵达遭遇战插旗点时</p>
           <p>都会刷新 1 - 3 个 个人事件</p>
           <p>若获得了事件，则必须立即查看该事件</p>
-          <p>个人事件放弃则抽取一次险中求胜</p>
-          <p>完成事件后有概率获得 0-1 个单位货币</p>
+          <p>个人事件放弃则抽取一次特殊卡牌</p>
+          <p>完成事件后有概率获得 1 - 3 个单位货币</p>
         </div>
       </template>
     </InfoBoard>

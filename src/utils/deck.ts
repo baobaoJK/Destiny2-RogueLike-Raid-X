@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { useDeckListStore, useUserStore } from '@/stores'
+import { useUserStore, useDeckListStore, useRaidStore } from '@/stores'
 import { lottery, lotteryByCount, randomNum, shuffle } from '@/utils'
 
 // 卡组类型表
@@ -421,6 +421,43 @@ export const saveCard = (card: any) => {
   })
 }
 
+// 根据卡牌名字存储卡片
+export const saveCardByName = (card: any) => {
+  const newCard = findCardByName(card.name, 'list')
+
+  saveCard(newCard)
+}
+
+// 根据卡牌名称寻找卡牌
+export const findCardByName = (name: string, type: string) => {
+  let card = null
+
+  if (type === 'list') {
+    for (let i = 0; i < 8; i++) {
+      const deckList = getDeckListType(deckType[i])
+      console.log(deckList)
+      deckList.forEach((item: any) => {
+        if (item.name === name) {
+          card = item
+        }
+      })
+    }
+  }
+
+  if (type === 'user') {
+    const userStore = useUserStore()
+
+    for (let i = 0; i < 8; i++) {
+      userStore.deckList[deckType[i]].forEach((item: any) => {
+        if (item.name === name) {
+          card = item
+        }
+      })
+    }
+  }
+  return card
+}
+
 // 删除卡片
 export const deleteCard = (card: any) => {
   console.log('删除卡牌机制')
@@ -561,26 +598,33 @@ export const getDeckListTagLevelList = (type: string, tagLevel: any) => {
 }
 
 // 稳妥起见
-// 卡池1 稳妥起见 safe   7张微弱增益 1张强大增益 4张微弱不适
+// 卡池1 稳妥起见 safe   6张微弱增益 1张强大增益 4张微弱不适 1张特殊卡牌
 export const getSafeDeck = () => {
   let safeDeck: any = []
 
   const microGainCount = getCardCount('MicroGain')
   const stringGainCount = getCardCount('StrongGain')
   const microDiscomfortCount = getCardCount('MicroDiscomfort')
+  const technologyCount = getCardCount('Technology')
 
-  if (microGainCount < 7 || stringGainCount < 1 || microDiscomfortCount < 4) return
+  if (microGainCount < 6 || stringGainCount < 1 || microDiscomfortCount < 4 || technologyCount < 1)
+    return
 
-  const microGainList = getDeckListTagLevelList('MicroGain', [2, 2, 3])
+  const microGainList = getDeckListTagLevelList('MicroGain', [2, 2, 2])
   const strongGainList = getDeckListTagLevelList('StrongGain', shuffle([0, 0, 1]))
   const microDiscomfortList = getDeckListTagLevelList('MicroDiscomfort', [1, 1, 2])
+  const technologyList = getDeckListTagLevelList('Technology', [1, 0, 0])
 
-  safeDeck = safeDeck.concat(microGainList).concat(strongGainList).concat(microDiscomfortList)
+  safeDeck = safeDeck
+    .concat(microGainList)
+    .concat(strongGainList)
+    .concat(microDiscomfortList)
+    .concat(technologyList)
   return safeDeck
 }
 
-// 身不由己
-// 卡池2 险中求胜 danger 5张微弱增益 2张强大增益 1张欧皇增益 1张微弱不适 3张重度不适
+// 险中求胜
+// 卡池2 险中求胜 danger 4张微弱增益 3张强大增益 1张欧皇增益 2张微弱不适 2张重度不适 1张特殊卡牌
 export const getDangerDeck = () => {
   let dangerDeck: any = []
 
@@ -589,25 +633,29 @@ export const getDangerDeck = () => {
   const opportunityCount = getCardCount('Opportunity')
   const microDiscomfortCount = getCardCount('MicroDiscomfort')
   const strongDiscomfortCount = getCardCount('StrongDiscomfort')
+  const technologyCount = getCardCount('Technology')
 
   if (
-    microGainCount < 5 ||
+    microGainCount < 4 ||
     strongGainCount < 2 ||
     microDiscomfortCount < 1 ||
-    strongDiscomfortCount < 3
+    strongDiscomfortCount < 2 ||
+    technologyCount < 1
   )
     return
 
-  const microGainList = getDeckListTagLevelList('MicroGain', [1, 2, 2])
+  const microGainList = getDeckListTagLevelList('MicroGain', [1, 1, 2])
   const strongGainList = getDeckListTagLevelList('StrongGain', shuffle([0, 1, 1]))
-  const microDiscomfortList = getDeckListTagLevelList('MicroDiscomfort', shuffle([0, 0, 1]))
-  const strongDiscomfortList = getDeckListTagLevelList('StrongDiscomfort', [1, 1, 1])
+  const microDiscomfortList = getDeckListTagLevelList('MicroDiscomfort', shuffle([0, 1, 1]))
+  const strongDiscomfortList = getDeckListTagLevelList('StrongDiscomfort', shuffle([0, 1, 1]))
+  const technologyList = getDeckListTagLevelList('Technology', [1, 0, 0])
 
   dangerDeck = dangerDeck
     .concat(microGainList)
     .concat(strongGainList)
     .concat(microDiscomfortList)
     .concat(strongDiscomfortList)
+    .concat(technologyList)
 
   if (opportunityCount != 0) {
     const opportunityList: any = getDeckListTagLevelList('Opportunity', shuffle([0, 0, 1]))
@@ -700,42 +748,34 @@ export const getLuckDeck = () => {
 }
 
 // 身心奉献
-// 卡池5 身心奉献 devote 6张辅助卡牌 6张重度不适
+// 卡池5 身心奉献 devote 8张辅助卡牌 4张微弱不适
 export const getDevoteDeck = () => {
   let devoteDeck: any = []
 
-  const microGainCount = getCardCount('MicroGain')
-  const StrongDiscomfortCount = getCardCount('StrongDiscomfort')
+  const microDiscomfortCount = getCardCount('MicroDiscomfort')
   const supportCount = getCardCount('Support')
+  const technologyCount = getCardCount('Technology')
 
-  if (StrongDiscomfortCount < 6) return
+  if (supportCount < 1 || microDiscomfortCount < 4) return
 
-  const StrongDiscomfortList = getDeckListTagLevelList('StrongDiscomfort', [2, 2, 2])
+  const microDiscomfortList = getDeckListTagLevelList('MicroDiscomfort', [1, 1, 2])
 
-  devoteDeck = devoteDeck.concat(StrongDiscomfortList)
+  devoteDeck = devoteDeck.concat(microDiscomfortList)
 
-  let card
-  let deckList
-  let deckLength = 12
-
-  if (supportCount < 6) {
-    deckLength = devoteDeck.length + supportCount
-  }
-
-  while (devoteDeck.length != deckLength) {
-    deckList = getDeckListType('Support')
-    card = lotteryByCount(deckList)
+  while (devoteDeck.length - microDiscomfortList.length != supportCount) {
+    const deckList = getDeckListType('Support')
+    const card = lotteryByCount(deckList)
     if (checkDeck(devoteDeck, card) && card != undefined) {
       devoteDeck.push(card)
     }
   }
   console.log(devoteDeck.length)
 
-  if (microGainCount < 7 - supportCount) return
+  if (technologyCount < 8 - supportCount) return
 
   while (devoteDeck.length != 12) {
-    deckList = getDeckListType('MicroGain')
-    card = lotteryByCount(deckList)
+    const deckList = getDeckListType('Technology')
+    const card = lotteryByCount(deckList)
     if (checkDeck(devoteDeck, card) && card != undefined) {
       devoteDeck.push(card)
     }
@@ -744,9 +784,27 @@ export const getDevoteDeck = () => {
   return devoteDeck
 }
 
+// 特殊卡牌
+// 获取特殊卡牌列表
+export const getTechnology = (size: number) => {
+  let luckDeck: any = []
+
+  const technologyCount = getCardCount('Technology')
+
+  if (technologyCount < size) return
+
+  const technologyList = getDeckListTagLevelList('Technology', [size, 0, 0])
+
+  luckDeck = luckDeck.concat(technologyList)
+
+  return luckDeck
+}
+
 // 特殊卡牌处理机制 ↓
 export const specialCard = (card: any) => {
   const userStore = useUserStore()
+  const raidStore = useRaidStore()
+
   let id = 0
   let str = card.description
   let doDelete = false
@@ -807,6 +865,61 @@ export const specialCard = (card: any) => {
         message: '因身上携带 不是，哥们！ 卡牌，此次的增益卡牌已被消除'
       })
     }
+  }
+
+  // 卡牌抵消
+  if (userStore.counteract) {
+    ElMessage({
+      message: `你已拥有 免死金牌 和 帝王禁令，这两张牌互相抵消，已被移除卡牌列表`,
+      duration: 0,
+      showClose: true,
+      grouping: true
+    })
+
+    const card1 = findCardByName('The-Medallion', 'user')
+    const card2 = findCardByName('Imperial-Ban', 'user')
+    deleteCard(card1)
+    deleteCard(card2)
+  }
+
+  // 欧皇增益
+  // ---------------------------------
+  // 判断是否有重重难关
+  if (card.name === 'Many-Difficulties') {
+    const count = raidStore.levelPoint - 1
+
+    for (let i = 0; i < count; i++) {
+      const num = randomNum(3, 5)
+      const card = getRandomCard(num, false)
+      saveCard(card)
+    }
+
+    ElMessage({
+      message: `因你携带重重难关，当前是第 ${count} 关，已经随机生成 ${count} 张不适卡牌`,
+      grouping: true,
+      duration: 0,
+      showClose: true
+    })
+  }
+
+  // 反人类
+  // ---------------------------------
+  // 判断是否有这不是很简单吗
+  if (card.name === 'Easy') {
+    const count = raidStore.levelPoint - 1
+
+    for (let i = 0; i < count; i++) {
+      const num = randomNum(0, 2)
+      const card = getRandomCard(num, false)
+      saveCard(card)
+    }
+
+    ElMessage({
+      message: `因你携带这不是很简单吗，当前是第 ${count} 关，已经随机生成 ${count} 张增益卡牌`,
+      grouping: true,
+      duration: 0,
+      showClose: true
+    })
   }
 
   // 重度不适
@@ -1030,6 +1143,32 @@ export const specialCard = (card: any) => {
   // 人为财死
   if (card.name == 'People-Die-For-Money') {
     doDelete = true
+  }
+
+  // 这不是个人恩怨
+  if (card.name == 'This-isnt-a-Personal') {
+    doDelete = true
+  }
+
+  // 感觉不如...
+  if (card.name == 'Feeling-Not-As-Good-As') {
+    doDelete = true
+    const playerDeckList = userStore.deckList
+    let cardNum = 0
+
+    for (let i = 0; i < 3; i++) {
+      const deckList = playerDeckList[deckType[i]]
+      deckList.forEach((card: any) => {
+        deleteCard(card)
+        cardNum += 1
+
+        const num = randomNum(0, 7)
+        const randomCard = getRandomCard(num, false)
+        saveCard(randomCard)
+      })
+    }
+
+    str = `已删除 ${cardNum} 张增益卡牌 已兑换成 ${cardNum} 张随机卡牌`
   }
 
   userStore.deckList[card.type].push(card)

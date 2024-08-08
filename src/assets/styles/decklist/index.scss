@@ -96,10 +96,8 @@
           width: 100%;
           height: 25.625rem;
           margin-bottom: 0.5rem;
-          background-image: url('/images/deck/deck-2.jpg');
           background-position: center;
           background-size: cover;
-          box-shadow: 0 0 1rem 0.25rem #7fe4c5;
           border-radius: 1rem;
         }
 
@@ -172,10 +170,8 @@
           justify-content: center;
           width: 8.125rem;
           height: 13.75rem;
-          background-image: url('/images/deck/deck-2.jpg');
           background-size: cover;
           border-radius: 0.5rem;
-          box-shadow: 0 0 1.25rem #7fe4c5;
           transition: opacity 0.3s;
 
           .info {
@@ -192,6 +188,31 @@
             border-radius: 0.25rem;
           }
         }
+      }
+    }
+  }
+
+  .random-dialog {
+
+    .random-list-box {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+
+      .random-flex {
+        display: flex;
+        height: 100%;
+      }
+
+      .random-left,
+      .random-right {
+        padding-top: 8.875rem;
+      }
+
+      .random-center {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: auto auto;
       }
     }
   }

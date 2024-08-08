@@ -4,6 +4,9 @@ import pinia from '@/stores'
 import App from './App.vue'
 import router from './router'
 
+import './assets/styles/base.scss'
+import './assets/styles/element-plus.scss'
+
 //Element Plus
 import ElementPlus from 'element-plus' // 导入 element-plus
 import 'element-plus/theme-chalk/index.css' // 根据 node_modules 文件夹选择对应的 theme-chalk/index.css 文件
